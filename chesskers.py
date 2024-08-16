@@ -18,10 +18,32 @@ class Board:
             "r": -4,
             "b": -3,
             "n": -2,
-            "p": -1,
+            "p": -1
         }
         for token in string.split():
             x = counter % 8
             y = counter // 8
             self.squares[y][x] = d[token]
             counter += 1
+
+        def __str__():
+        d = {
+            0: ".",
+            1: "P",
+            2: "N",
+            3: "B",
+            4: "R",
+            5: "Q",
+            6: "K",
+            -6: "k",
+            -5: "q",
+            -4: "r",
+            -3: "b",
+            -2: "n",
+            -1: "p"
+        }
+
+        for row in squares:
+            for piece in row:
+                print(d[piece] + " ")
+            print("\n")
