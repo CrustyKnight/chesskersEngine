@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 
 class Board:
-    def __init__(self):
+    def __init__(self, board, fen=False):
+        if fen:
+            self.squares = self.from_fen_string(board)
+        else:
+            self.squares = self.from_string(board)
+
+    def from_fen_string(self, string):
         pass
+
     def from_string(self, string):
         counter = 0
         d = {
@@ -26,7 +33,7 @@ class Board:
             self.squares[y][x] = d[token]
             counter += 1
 
-        def __str__():
+    def __str__():
         d = {
             0: ".",
             1: "P",
@@ -47,3 +54,6 @@ class Board:
             for piece in row:
                 print(d[piece] + " ")
             print("\n")
+
+    def piece_at(self, row, col):
+        return self.squares[row][col]
