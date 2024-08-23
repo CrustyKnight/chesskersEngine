@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 
 class Board:
+
+# TODO: Implement moves
+
     def __init__(self, board, fen=False):
         if fen:
             self.squares = self.from_fen_string(board)
         else:
             self.squares = self.from_string(board)
+        self.moves = self.calc_moves()
 
     def from_fen_string(self, string):
         pass
 
     def from_string(self, string):
+        # Also want information pertaining to en passant squares, turn number, etc
         counter = 0
         d = {
             ".": 0,
