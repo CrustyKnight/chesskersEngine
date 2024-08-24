@@ -83,7 +83,8 @@ class Board:
                 print(d[piece] + " ")
             print("\n")
 
-    def piece_at(self, row, col):
+    def piece_at(self, square):
+        row, col = square
         return self.squares[row][col]
 
     def check_valid_step_and_jump(
