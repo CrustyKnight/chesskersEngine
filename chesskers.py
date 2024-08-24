@@ -38,7 +38,7 @@ class Board:
             self.squares[y][x] = d[token]
             counter += 1
 
-    def __str__():
+    def __str__(self):
         d = {
             0: ".",
             1: "P",
@@ -55,7 +55,7 @@ class Board:
             -1: "p"
         }
 
-        for row in squares:
+        for row in self.squares:
             for piece in row:
                 print(d[piece] + " ")
             print("\n")
