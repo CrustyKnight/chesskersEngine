@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from bot import find_best_move
 
 
 class Board:
@@ -228,3 +229,7 @@ class Board:
             vd = abs(final_row - start_row)/(final_row - start_row) # Vertical direction (+- 1): vd
             if(final_row == -1 and self.piece_at(start_row, start_col) > 0):
                 return "ua"
+
+    def best_move(self, depth):
+        return find_best_move(self, depth) 
+
