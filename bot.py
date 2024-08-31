@@ -83,7 +83,7 @@ def alphabeta(board, depth):
     if board.turn == board.white:
         return abmax(board, depth, float("-inf"), float("inf"))
     else:
-        return abmin(board, depth, float("-inf"), floawt("inf"))
+        return abmin(board, depth, float("-inf"), float("inf"))
 
 def find_best_move(board, depth):
     # change if needed
