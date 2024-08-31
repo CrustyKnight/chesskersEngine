@@ -100,7 +100,14 @@ class Board:
         # jumps are described as the 'checkers' part of chesskers, where the pieces take a piece, move an extra square in the direction they took the piece, and can ...
         # ... continue taking pieces if they are 'in range' of the piece, like how a checkers piece which takes an opponent piece becomes the only piece that can be moved...
         # ... that too only if there are pieces to take ... otherwise the 'jumping' ends.
+
         # Step functions
+        def check_pawn_step():
+            if self.piece_at[start_row][start_col] == -1:
+                return final_row - start_row == 1
+            elif self.piece_at[start_row][start_col] == 1:
+                return final_row - start_row == -1
+
         def check_knight_step():
             if (
                 final_row < 0 or final_col < 0 or final_row > 7 or final_col > 7
@@ -181,7 +188,42 @@ class Board:
                 return False
 
         def check_queen_step():  # Queens are bishops and rooks in one piece, so combining both their step methods tells us the queen's possible steps
-            # Checking for diagonal (bishop style) moves
-            check_bishop_step()
-            # Checking for straight/lateral (rook style) moves
-            check_rook_step()
+            return check_bishop_step() or check_rook_step()
+        
+        def check_king_step(): # Checks that the king moves 1 square in any direction, but does not stay still...
+            return abs(final_col - start_col) <= 1 and abs(final_row - start_row) <= 1 and not(final_col - start_col == 0 and final_row - start_row == 0)
+
+        # Jump functions
+        def check_pawn_jump(): 
+            # Checking for moves where pawns take pieces, pawns are chesskers non-queen pieces, except...
+            # They can take pieces off the side of the board as well. 
+            # Checking that pawns are moving in an appropriate pattern to begin with
+            if(self.piece_at(start_row, start_col) == 1):
+                real_row = 8 - start_row
+            elif(self.piece_at(start_row, start_col) == -1):
+                real_row = start_row
+            else: return False # For some reason, if the selected piece happens to not be a pawn. 
+            # Using serialized rows of how far the pawn is advanced, checking that it is indeed only moving 'forward' on the board. 
+            if not (final_row - real_row == 2 or abs(final_col - start_col) == 2):
+                return False
+            # Checking if piece is taking an edge piece (a piece on any edge square), which would end the turn. 
+            if(real_row == 1 or start_col == 1 or real_row == 6 or start_col == 6):
+                # checking the horizontal component of the diagonal move. 
+                if(final_col > 7):
+                    final_col = 0
+                elif(final_col < 0):
+                    final_col = 7
+                # Checking the vertical component fo the diagonal move
+                if(final_row > 7):
+                    final_row = 0
+                elif(final_row < 0):
+                    final_row = 7
+                # Pieces already on the edge cannot 'jump of the edge' to 'teleport to the other side of the board'. 
+            # returning true or false based son whether a piece can move to its desired final square or not
+            return not (final_row < 0 or final_col < 0 or final_row > 7 or final_col > 7)
+        
+        def check_knight_jump(): 
+            hd = abs(final_col - start_col)/(final_col - start_col) # Horizontal direction (+- 1): hd
+            vd = abs(final_row - start_row)/(final_row - start_row) # Vertical direction (+- 1): vd
+            if(final_row == -1 and self.piece_at(start_row, start_col) > 0):
+                return "ua"
