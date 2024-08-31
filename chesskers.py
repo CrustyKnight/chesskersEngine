@@ -87,7 +87,7 @@ class Board:
         row, col = square
         return self.squares[row][col]
 
-    def check_valid_step_and_jump(
+    def check_valid_step_and_jump( #This function is used to VALIDATE moves, not generate them. 
         self, start, end
     ):  # start and end are tuples of 2 elements: (row, col):
         start_row, start_col = start
@@ -100,14 +100,19 @@ class Board:
         # steps are described as normal chess moves, which occur when pieces move from their current square to an empty square.
         # jumps are described as the 'checkers' part of chesskers, where the pieces take a piece, move an extra square in the direction they took the piece, and can ...
         # ... continue taking pieces if they are 'in range' of the piece, like how a checkers piece which takes an opponent piece becomes the only piece that can be moved...
-        # ... that too only if there are pieces to take ... otherwise the 'jumping' ends.
+        # ... that too only if there are pieces to take ... otherwise the 'jumping' and player's turn end.
 
         # Step functions
         def check_pawn_step():
-            if self.piece_at[start_row][start_col] == -1:
-                return final_row - start_row == 1
-            elif self.piece_at[start_row][start_col] == 1:
-                return final_row - start_row == -1
+            boolean = True
+            if self.piece_at((start_row, start_col)) == -1: # checking for black pawn
+                if(start_row == 1):
+                    boolean = final_row - start_row == 2
+                return boolean or final_row - start_row == 1 # Returning True if it can move 1 square or 2 squares (black moves DOWN the board)
+            elif self.piece_at((start_row, start_col)) == 1: # checking for white pawn
+                if start_row == 6:
+                    boolean = final_row - start_row == -2
+                return boolean or final_row - start_row == -1 # Returning True if it can move 1 square or 2 squares (white moves UP the board)
 
         def check_knight_step():
             if (
@@ -195,36 +200,20 @@ class Board:
             return abs(final_col - start_col) <= 1 and abs(final_row - start_row) <= 1 and not(final_col - start_col == 0 and final_row - start_row == 0)
 
         # Jump functions
-        def check_pawn_jump(): 
-            # Checking for moves where pawns take pieces, pawns are chesskers non-queen pieces, except...
-            # They can take pieces off the side of the board as well. 
-            # Checking that pawns are moving in an appropriate pattern to begin with
-            if(self.piece_at(start_row, start_col) == 1):
-                real_row = 8 - start_row
-            elif(self.piece_at(start_row, start_col) == -1):
-                real_row = start_row
-            else: return False # For some reason, if the selected piece happens to not be a pawn. 
-            # Using serialized rows of how far the pawn is advanced, checking that it is indeed only moving 'forward' on the board. 
-            if not (final_row - real_row == 2 or abs(final_col - start_col) == 2):
-                return False
-            # Checking if piece is taking an edge piece (a piece on any edge square), which would end the turn. 
-            if(real_row == 1 or start_col == 1 or real_row == 6 or start_col == 6):
-                # checking the horizontal component of the diagonal move. 
-                if(final_col > 7):
-                    final_col = 0
-                elif(final_col < 0):
-                    final_col = 7
-                # Checking the vertical component fo the diagonal move
-                if(final_row > 7):
-                    final_row = 0
-                elif(final_row < 0):
-                    final_row = 7
-                # Pieces already on the edge cannot 'jump of the edge' to 'teleport to the other side of the board'. 
-            # returning true or false based son whether a piece can move to its desired final square or not
-            return not (final_row < 0 or final_col < 0 or final_row > 7 or final_col > 7)
+        def check_pawn_jump(): # pawns always jump such that they move 2 columns and 2 rows (up, left or up right relative to the direction they move)
+            if abs(final_col - start_col) == 2:    
+                hd = abs(final_col - start_col)/(final_col - start_col) # Horizontal direction (+-1, used to check square being 'taken' over)
+                if self.piece_at(((start_row + final_row)/2, (start_col + hd))) != 0: # Checking that the pawn is indeed taking a piece
+                    if self.piece_at((start_row, start_col)) == -1 : # Checking and defining movement for black pawns
+                            if (final_row - start_row == 2):
+                                return True
+                    elif self.piece_at((start_row, start_col)) == 1: # Checking and defining movement for white pawns
+                        if self.piece_at((start_row, start_col)) == 1: 
+                            if(final_row - start_row == -2):
+                                return True
+            return False
         
-        def check_knight_jump(): 
-            hd = abs(final_col - start_col)/(final_col - start_col) # Horizontal direction (+- 1): hd
-            vd = abs(final_row - start_row)/(final_row - start_row) # Vertical direction (+- 1): vd
-            if(final_row == -1 and self.piece_at(start_row, start_col) > 0):
-                return "ua"
+        #TODO: Finish knight jump, bishop jump, rook jump, queen jump, and king jump. 
+        
+        def check_knight_jump(): # knight jumps either result in a 3 x 1 sqauare 'L' shape or in a 2 x 2 square 'L' shape. 
+            pass
