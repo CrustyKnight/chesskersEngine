@@ -33,7 +33,7 @@ def alphabeta(board, depth):
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
 
-        return sorted(moves, lambda x : evalmove(x[0]))
+        return sorted(moves, key=lambda x : evalmove(x[0]))
         
     def abmax(board, depth, alpha, beta):
         if depth == 1:
