@@ -315,3 +315,5 @@ class Board:
             check_queen_jump()
         else:
             check_king_jump()
+
+# TODO: implement actual move generation and use these functions to check. 
