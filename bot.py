@@ -1,14 +1,41 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
 
-# TODO: implement sevaluate
-evaluate = sevaluate 
-
 def map(l, fun):
     ret = []
     for L in l:
         ret.append(fun(L))
 
     return ret
+
+evaluate = sevaluate 
+
+val_map = {
+
+    0 : 0,
+    1 : 1,
+    2 : 7,
+    3 : 4,
+    4 : 5,
+    5 : 6,
+    6 : 1000,
+    -6 : -1000,
+    -5 : -6,
+    -4 : -5,
+    -3 : -4,
+    -2 : -7,
+    -1 : -1 
+
+}
+
+def sevaluate_board(board):
+    total = 0
+
+   for row in board.squares:
+    for piece in row:
+        total+=val_map[piece]
+    
+    return total
+        
 
 def evaluate_move(move, board, depth):
     # change if needed
@@ -87,7 +114,7 @@ def alphabeta(board, depth):
 
 def find_best_move(board, depth):
     # change if needed
-    white = True if board.turn = board.white else False 
+    white = True if board.turn == board.white else False 
 
     if white:
         return max(map(board.moves, evaluate_move(move, board, depth)), key=lambda m : m[0])[1]
