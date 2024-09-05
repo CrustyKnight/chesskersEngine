@@ -329,10 +329,32 @@ class Board:
         return False 
 
     def from_UCN(self, move):
-        # move notation: e2e6te8
+        # move notation: e2xe6te7
+        #                e2e6
+        #                e2xe6te4
+        square_map = {
+            "a" : 1,
+            "b" : 2,
+            "c" : 3,
+            "d" : 4,
+            "e" : 5,
+            "f" : 6,
+            "g" : 7,
+            "h" : 8
+        }
 
-        if self.is_step(move):
-           pass 
+        if 't' in move:
+            # I'm implementing this tomorrow
+            pass
+        else:
+            s = str[:2]
+            e = str[2:]
+
+            return (board.squares[row_map[s[0]][int(s[1])], board.squares[row_map[e[0]][int(e[1])])
+
+
+
+
 
             
 
