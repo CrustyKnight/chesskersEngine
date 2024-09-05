@@ -332,7 +332,7 @@ class Board:
         # move notation: e2e6te8
 
         if self.is_step(move):
-            
+           pass 
 
             
 
