@@ -350,7 +350,7 @@ class Board:
             s = str[:2]
             e = str[2:]
 
-            return (board.squares[row_map[s[0]][int(s[1])], board.squares[row_map[e[0]][int(e[1])])
+            return (board.squares[row_map[s[0]]][int(s[1])], board.squares[row_map[e[0]]][int(e[1])])
 
 
 
