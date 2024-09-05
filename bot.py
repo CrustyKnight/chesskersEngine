@@ -1,4 +1,5 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
+# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
 
 def map(l, fun):
     ret = []

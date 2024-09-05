@@ -301,7 +301,7 @@ class Board:
             if abs(horizontal_distance) == 2 or abs(vertical_distance) == 2:
                 # Checking all squares around like a rook AND Bishop in a 1 square diagonal, since kings can take in any direction when they're on a spree
                 return self.piece_at((start_row + vertical_distance - vd, start_col)) != 0 or self.piece_at(start_row, start_col + horizontal_distance - hd) != 0 or self.piece_at((start_row + vertical_distance - vd, start_col + horizontal_distance - hd)) != 0 
-
+        
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
         if abs(piece) == 1:
             check_pawn_jump()
@@ -315,5 +315,25 @@ class Board:
             check_queen_jump()
         else:
             check_king_jump()
+
+    def is_step(self, move):
+        if len(move[0]) == 2:
+            return True
+
+        return False
+
+    def is_jump(self, move):
+        if len(move[0]) == 3:
+            return True
+
+        return False 
+
+    def from_UCN(self, move):
+        # move notation: e2e6te8
+
+        if self.is_step(move):
+            
+
+            
 
 # TODO: implement actual move generation and use these functions to check. 
