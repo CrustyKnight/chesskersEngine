@@ -328,10 +328,18 @@ class Board:
 
         return False 
 
+    # Universal Chesskers Notation
     def from_UCN(self, move):
-        # move notation: e2xe6te7
+
+        # for e4e5 and cases like that
+        def parse_move(move):
+            start = board.squares[val_map[move[0]]][int(move[1])]
+            end = board.squares[val_map[move[2]]][int(move[3])]
+            return [(start, end, end)]
+
+        # move notation: e2e6te7
         #                e2e6
-        #                e2xe6te4
+        #                e2e6te4|e4e5te7
         square_map = {
             "a" : 1,
             "b" : 2,
@@ -343,19 +351,28 @@ class Board:
             "h" : 8
         }
 
-        if 't' in move:
-            # I'm implementing this tomorrow
-            pass
-        else:
-            s = str[:2]
-            e = str[2:]
 
-            return (board.squares[row_map[s[0]][int(s[1])], board.squares[row_map[e[0]][int(e[1])])
+        if 't' not in move:
+            return parse_move(move)
 
+        M = []
+        subs = move.split('|')
 
+        for m in subs:
+            if 't' not in m:
+                M.append(parse_move(m))
 
+            else:
+                # splitting in order to grab the 3 squares
+                name = move.split('t')
 
+                start = board.squares[val_map[name[0][0]][int(name[0][1])]
+                end = board.squares[val_map[name[0][2]][int(name[0][3])]
+                hop = board.squares[val_map[name[1][0]]][int(name[1][1])] 
 
+                M.append((start,end,hop))
+
+        return M
+                
             
-
 # TODO: implement actual move generation and use these functions to check. 
