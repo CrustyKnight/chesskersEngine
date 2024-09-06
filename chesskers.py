@@ -7,7 +7,18 @@ class Board:
     # TODO: Implement moves
     # TODO: Test and debug step and jump functions
 
-    def __init__(self, board, fen=False):
+    def __init__(self, 
+board=
+"""
+r n b q k b n r
+p p p p p p p p
+. . . . . . . .
+. . . . . . . .
+. . . . . . . . 
+. . . . . . . .
+P P P P P P P P
+R N B Q K B N R
+""", fen=False):
         if fen:
             self.squares = self.from_fen_string(board)
         else:
@@ -80,10 +91,14 @@ class Board:
             -1: "p",
         }
 
+        ret = ""
+
         for row in self.squares:
             for piece in row:
-                print(d[piece] + " ")
-            print("\n")
+                ret+= d[piece] + " "
+            ret+="\n"
+
+        return ret
 
     def piece_at(self, square):
         row, col = square
