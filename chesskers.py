@@ -9,6 +9,7 @@ class Board:
 
     def __init__(self, fen=False,
 board=
+//other info goes below here
 """
 r n b q k b n r
 p p p p p p p p
@@ -103,6 +104,11 @@ R N B Q K B N R
     def piece_at(self, square):
         row, col = square
         return self.squares[row][col]
+
+    # boolean that returns whether or not a given move is legal
+    # no need for stuff like pseudo-legality because there isn't check in this game
+    def legal_move(self, move):
+        return True if move in self.legal_moves else False
 
     # In chesskers, we define moves as having 2 types: steps and jumps
     # A step is when a piece moves to an empty square, in which case it moves like a normal chess piece

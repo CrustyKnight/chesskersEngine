@@ -60,6 +60,7 @@ def alphabeta(board, depth):
         # Some heuristic ideas:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
+        #   other standard move ordering heuristics
 
         return sorted(moves, key=lambda x : evalmove(x[0]))
         

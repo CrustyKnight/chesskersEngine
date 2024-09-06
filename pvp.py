@@ -8,7 +8,8 @@ def main():
 
     while True:
         # change if needed
-        if Board.legal_move(move):
-            Board.push(move)
+        if game.legal_move(move):
+            game.push(move)
+            print(game)
         else:
             print("move isn't legal")
