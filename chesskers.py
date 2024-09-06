@@ -381,8 +381,8 @@ R N B Q K B N R
                 # splitting in order to grab the 3 squares
                 name = move.split('t')
 
-                start = board.squares[val_map[name[0][0]][int(name[0][1])]
-                end = board.squares[val_map[name[0][2]][int(name[0][3])]
+                start = board.squares[val_map[name[0][0]]][int(name[0][1])]
+                end = board.squares[val_map[name[0][2]]][int(name[0][3])]
                 hop = board.squares[val_map[name[1][0]]][int(name[1][1])] 
 
                 M.append((start,end,hop))
