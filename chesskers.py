@@ -416,7 +416,10 @@ R N B Q K B N R
         return M
                 
             
-# TODO: implement actual move generation and use these functions to check. 
+
+
+    def calc_moves(self):
+        pass
 
     def square_moves(self, square):
         p = self.piece_at(square)
@@ -441,6 +444,9 @@ R N B Q K B N R
             d = -c
             moves = [add_tuple(square, (d, 0))]
             # add thingy to tell if at start spot and add another move
+            start_row = 6 if p == 1 else 1
+            if (square[0] == start_row):
+                moves.append(add_tuple(square, (d*2, 0)))
             return [mv for mv in moves if self.empty(mv) and in_bounds(mv)]
 
         def knight():
