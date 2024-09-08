@@ -7,11 +7,24 @@ class Board:
     # TODO: Implement moves
     # TODO: Test and debug step and jump functions
 
-    def __init__(self, board, fen=False):
+    def __init__(self, board = None, fen=False):
+        self.squares = [[0 for i in range(8)] for i in range(8)]
         if fen:
             self.squares = self.from_fen_string(board)
+        elif board:
+            self.from_string(board)
         else:
-            self.squares = self.from_string(board)
+            self.from_string("""\
+put other data here
+r n b q k b n r
+p p p p p p p p
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+P P P P P P P P
+R N B Q K B N R
+            """)
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -83,7 +96,27 @@ class Board:
         for row in self.squares:
             for piece in row:
                 print(d[piece] + " ")
-            print("\n")
+
+
+    def print(self, guides=False):
+        def to_ascii(piece):
+            return [".", "P", "N", "B", "R", "Q", "K", "k", "q", "r", "b", "n", "p"][
+                piece
+            ]
+
+        rows = ["8", "7", "6", "5", "4", "3", "2", "1"]
+        cols_header = "  a b c d e f g h\n +----------------"
+
+        y = 0
+        if guides:
+            print(cols_header)
+        for row in self.squares:
+            if guides:
+                print(rows[y], end="|")
+            for piece in row:
+                print(to_ascii(piece), end=" ")
+            print("")
+            y += 1
 
     def piece_at(self, square):
         row, col = square
@@ -316,4 +349,64 @@ class Board:
         else:
             check_king_jump()
 
-# TODO: implement actual move generation and use these functions to check. 
+
+
+    def square_moves(self, square):
+        p = self.piece_at(square)
+
+    def square_steps(self, square):
+        def direxp(direction):
+            sqs = []
+            sq = add_tuple(square, direction)
+            while in_bounds(sq) and self.empty(sq):
+                sqs.append(sq)
+                sq = add_tuple(sq, direction)
+            return sqs
+        def in_bounds(square):
+            r,c = square
+            return (0 <= r < 8 and 0 <= c < 8)
+        def add_tuple(a, b):
+            return (a[0]+b[0], a[1]+b[1])
+        p = self.piece_at(square)
+
+        def pawn():
+            c = -1 if p < 0 else 1
+            d = -c
+            moves = [add_tuple(square, (d, 0))]
+            # add thingy to tell if at start spot and add another move
+            return [mv for mv in moves if self.empty(mv) and in_bounds(mv)]
+
+        def knight():
+            moves = [(-1, 2), (-1, -2),
+                     (1, 2), (1, -2),
+                     (2, 1), (2, -1),
+                     (-2, 1), (-2, -1)]
+            moves = [add_tuple(square, m) for m in moves]
+            moves = [m for m in moves if self.empty(m) and in_bounds(m)]
+            #moves = [m for m in moves if self.check_valid_step(square, m)]
+            return moves
+        def bishop():
+            moves = []
+            directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+            # travel in each direction until I hit a piece or the end of the board
+            return [mv for d in directions for mv in direxp(d)]
+
+        def rook():
+            directions = [(1, 0), (-1, 0), (0, -1), (0, 1)]
+            return [mv for d in directions for mv in direxp(d)]
+        def queen():
+            return bishop() + rook()
+        def king():
+            moves = [(-1, -1), (-1, 1), (1, -1), (1, 1), # diag
+                     (1, 0), (-1, 0), (0, -1), (0, 1)] # straight
+            return [m for m in moves if self.empty(m) and in_bounds(m)]
+
+        return [lambda: [], pawn, knight, bishop, rook, queen, king][abs(p)]()
+
+    def square_jumps(self, square, ctx):
+        pass
+
+    def empty(self, square):
+        return 0 == self.piece_at(square)
+
+# TODO: implement actual move generation and use these functions to check.
