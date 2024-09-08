@@ -448,7 +448,6 @@ R N B Q K B N R
             if (square[0] == start_row):
                 moves.append(add_tuple(square, (d*2, 0)))
             return [mv for mv in moves if self.empty(mv) and in_bounds(mv)]
-
         def knight():
             moves = [(-1, 2), (-1, -2),
                      (1, 2), (1, -2),
@@ -463,7 +462,6 @@ R N B Q K B N R
             directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
             # travel in each direction until I hit a piece or the end of the board
             return [mv for d in directions for mv in direxp(d)]
-
         def rook():
             directions = [(1, 0), (-1, 0), (0, -1), (0, 1)]
             return [mv for d in directions for mv in direxp(d)]
@@ -476,8 +474,63 @@ R N B Q K B N R
 
         return [lambda: [], pawn, knight, bishop, rook, queen, king][abs(p)]()
 
-    def square_jumps(self, square, ctx):
-        pass
+    def square_jumps(self, square, ctx=None):
+        # ctx is really just for the queen right now.
+        # it will be a map { queen: ("diag"|"straight")}
+        # maybe later it will just become a number (if efficiency matters super)
+        def direxp(direction):
+            # TODO mod this to give the location of the piece it hits, not all the squares before
+            # and give nothing if it hits the edge
+            sqs = []
+            sq = add_tuple(square, direction)
+            while in_bounds(sq) and self.empty(sq):
+                sqs.append(sq)
+                sq = add_tuple(sq, direction)
+            return sqs
+        def in_bounds(square):
+            r,c = square
+            return (0 <= r < 8 and 0 <= c < 8)
+        def add_tuple(a, b):
+            return (a[0]+b[0], a[1]+b[1])
+        def jump_direction(taken):
+            # taken is the square of the taken piece
+            def sign(num):
+                return -1 if num < 0 else 0 if num == 0 else 1
+            return (sign(taken[0] - square[0]), sign(taken[1] - square[1]))
+        p = self.piece_at(square)
+        def pawn():
+            def add_dir(mv):
+                return add_tuple(mv, jump_direction(mv))
+            c = -1 if p < 0 else 1
+            d = -c
+            possible_pieces = [add_tuple(square, (d, 1)), add_tuple(square, (d, -1))]
+            possible_pieces = [mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)]
+            possible_pieces = [(mv, add_dir(mv)) for mv in possible_pieces if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))]
+            # TODO right now this won't allow taking around the edges. fix that
+            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
+            return possible_pieces
+        def knight():
+            def split_dir(direction):
+                return [(direction[0], 0), (0, direction[1])]
+            moves = [(-1, 2), (-1, -2),
+                     (1, 2), (1, -2),
+                     (2, 1), (2, -1),
+                     (-2, 1), (-2, -1)]
+            moves = [add_tuple(square, m) for m in moves]
+            moves = [m for m in moves if in_bounds(m) and not self.empty(m)]
+            new_moves = []
+            for mv in moves:
+                d = split_dir(jump_direction(mv))
+                new_moves.append((mv, add_tuple(mv, d[0])))
+                new_moves.append((mv, add_tuple(mv, d[1])))
+            new_moves = [mv for mv in new_moves if in_bounds(mv[1]) and self.empty(mv[1])]
+            # taking over the edges again
+            return new_moves
+
+        if abs(p) == 1:
+            return pawn()
+        if abs(p) == 2:
+            return knight()
 
     def empty(self, square):
         return 0 == self.piece_at(square)
