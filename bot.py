@@ -31,9 +31,9 @@ val_map = {
 def sevaluate_board(board):
     total = 0
 
-   for row in board.squares:
-    for piece in row:
-        total+=val_map[piece]
+    for row in board.squares:
+        for piece in row:
+            total+=val_map[piece]
     
     return total
         
