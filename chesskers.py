@@ -7,24 +7,23 @@ class Board:
     # TODO: Implement moves
     # TODO: Test and debug step and jump functions
 
-    def __init__(self, board = None, fen=False):
+    def __init__(self, fen=False,
+board=
+"""other info for the board state (en-passant, etc.)
+r n b q k b n r
+p p p p p p p p
+. . . . . . . .
+. . . . . . . .
+. . . . . . . . 
+. . . . . . . .
+P P P P P P P P
+R N B Q K B N R
+"""):
         self.squares = [[0 for i in range(8)] for i in range(8)]
         if fen:
             self.squares = self.from_fen_string(board)
         elif board:
             self.from_string(board)
-        else:
-            self.from_string("""\
-put other data here
-r n b q k b n r
-p p p p p p p p
-. . . . . . . .
-. . . . . . . .
-. . . . . . . .
-. . . . . . . .
-P P P P P P P P
-R N B Q K B N R
-            """)
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -93,10 +92,14 @@ R N B Q K B N R
             -1: "p",
         }
 
+        ret = ""
+
         for row in self.squares:
             for piece in row:
-                print(d[piece] + " ")
+                ret+= d[piece] + " "
+            ret+="\n"
 
+        return ret
 
     def print(self, guides=False):
         def to_ascii(piece):
@@ -121,6 +124,11 @@ R N B Q K B N R
     def piece_at(self, square):
         row, col = square
         return self.squares[row][col]
+
+    # boolean that returns whether or not a given move is legal
+    # no need for stuff like pseudo-legality because there isn't check in this game
+    def legal_move(self, move):
+        return True if move in self.legal_moves else False
 
     # In chesskers, we define moves as having 2 types: steps and jumps
     # A step is when a piece moves to an empty square, in which case it moves like a normal chess piece
@@ -334,7 +342,7 @@ R N B Q K B N R
             if abs(horizontal_distance) == 2 or abs(vertical_distance) == 2:
                 # Checking all squares around like a rook AND Bishop in a 1 square diagonal, since kings can take in any direction when they're on a spree
                 return self.piece_at((start_row + vertical_distance - vd, start_col)) != 0 or self.piece_at(start_row, start_col + horizontal_distance - hd) != 0 or self.piece_at((start_row + vertical_distance - vd, start_col + horizontal_distance - hd)) != 0 
-
+        
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
         if abs(piece) == 1:
             check_pawn_jump()
@@ -349,7 +357,66 @@ R N B Q K B N R
         else:
             check_king_jump()
 
+    def is_step(self, move):
+        if len(move[0]) == 2:
+            return True
 
+        return False
+
+    def is_jump(self, move):
+        if len(move[0]) == 3:
+            return True
+
+        return False 
+
+    # Universal Chesskers Notation
+    def from_UCN(self, move):
+
+        # for e4e5 and cases like that
+        def parse_move(move):
+            start = board.squares[val_map[move[0]]][int(move[1])]
+            end = board.squares[val_map[move[2]]][int(move[3])]
+            return [(start, end, end)]
+
+        # move notation: e2e6te7
+        #                e2e6
+        #                e2e6te4|e4e5te7
+        square_map = {
+            "a" : 1,
+            "b" : 2,
+            "c" : 3,
+            "d" : 4,
+            "e" : 5,
+            "f" : 6,
+            "g" : 7,
+            "h" : 8
+        }
+
+
+        if 't' not in move:
+            return parse_move(move)
+
+        M = []
+        subs = move.split('|')
+
+        for m in subs:
+            if 't' not in m:
+                M.append(parse_move(m))
+
+            else:
+                # splitting in order to grab the 3 squares
+                name = move.split('t')
+
+                start = board.squares[val_map[name[0][0]]][int(name[0][1])]
+                end = board.squares[val_map[name[0][2]]][int(name[0][3])]
+                hop = board.squares[val_map[name[1][0]]][int(name[1][1])] 
+
+                M.append((start,end,hop))
+
+        return M
+                
+            
+# TODO: implement actual move generation and use these functions to check. 
 
     def square_moves(self, square):
         p = self.piece_at(square)
@@ -408,5 +475,3 @@ R N B Q K B N R
 
     def empty(self, square):
         return 0 == self.piece_at(square)
-
-# TODO: implement actual move generation and use these functions to check.
