@@ -1,7 +1,5 @@
-# I like having this as a separate file, it's still integrated in chesskers.py though
-
-# TODO: implement sevaluate
-# evaluate = sevaluate 
+# I like having this as a separate file, it's still integrated in chesskers.py tho
+# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
 
 def map(l, fun):
     ret = []
@@ -9,6 +7,36 @@ def map(l, fun):
         ret.append(fun(L))
 
     return ret
+
+evaluate = sevaluate 
+
+val_map = {
+
+    0 : 0,
+    1 : 1,
+    2 : 7,
+    3 : 4,
+    4 : 5,
+    5 : 6,
+    6 : 1000,
+    -6 : -1000,
+    -5 : -6,
+    -4 : -5,
+    -3 : -4,
+    -2 : -7,
+    -1 : -1 
+
+}
+
+def sevaluate_board(board):
+    total = 0
+
+    for row in board.squares:
+        for piece in row:
+            total+=val_map[piece]
+    
+    return total
+        
 
 def evaluate_move(move, board, depth):
     # change if needed
@@ -32,6 +60,7 @@ def alphabeta(board, depth):
         # Some heuristic ideas:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
+        #   other standard move ordering heuristics
 
         return sorted(moves, key=lambda x : evalmove(x[0]))
         
