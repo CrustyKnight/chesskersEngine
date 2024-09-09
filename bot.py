@@ -1,7 +1,7 @@
-# I like having this as a separate file, it's still integrated in chesskers.py tho
+# I like having this as a separate file, it's still integrated in chesskers.py though
 
 # TODO: implement sevaluate
-evaluate = sevaluate 
+# evaluate = sevaluate 
 
 def map(l, fun):
     ret = []
@@ -87,7 +87,7 @@ def alphabeta(board, depth):
 
 def find_best_move(board, depth):
     # change if needed
-    white = True if board.turn = board.white else False 
+    white = True if board.turn == board.white else False 
 
     if white:
         return max(map(board.moves, evaluate_move(move, board, depth)), key=lambda m : m[0])[1]

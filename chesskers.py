@@ -24,7 +24,7 @@ class Board:
         # P P P P P P P P
         # R N B Q K B N R
         #         """)
-        self.moves = self.calc_moves()
+        # self.moves = self.calc_moves()
 
     def from_fen_string(self, string):
         pass
@@ -86,8 +86,11 @@ class Board:
             print("\n")
 
     def piece_at(self, square):
-        row, col = square
-        return self.squares[row][col]
+        (row, col) = square
+        if self.squares[row][col] != 0:
+            return self.squares[row][col]
+        else:
+            return 0
 
     # In chesskers, we define moves as having 2 types: steps and jumps
     # A step is when a piece moves to an empty square, in which case it moves like a normal chess piece
@@ -182,7 +185,7 @@ class Board:
             check_king_step()
 
     def check_valid_jump(  # This function is used to VALIDATE jumps, ie piece-taking moves/captures
-        self, start, end, isFirstJumpOverall = True
+        self, start, end, isFirstJumpOverall=True
     ):  # start and end are tuples of 2 elements: (row, col):
         start_row, start_col = start
         final_row, final_col = end
@@ -201,16 +204,16 @@ class Board:
         # Returning false if piece is not moving (final row = start row && final col = start col)
         if final_row - start_row == 0 and final_col - start_col == 0:
             return False
-        
-        # Returning false if end square is not empty: 
+
+        # Returning false if end square is not empty:
         if self.piece_at(end) != 0:
             return False
-        
+
         # checking out of bounds: now pieces can take over the edge and teleport to the other side of the board...
-        def fix_piece_location(): # We might need this function to further account for edge effects, especially if they 
-                                    # have only been accounted for in imagination. Maybe we won't need it in this function. 
-                                    # but we will certainly NEED THIS FUNCTION IN MOVE GENERATION
-                                    # TODO: Implement this function into move generation...
+        def fix_piece_location():  # We might need this function to further account for edge effects, especially if they
+            # have only been accounted for in imagination. Maybe we won't need it in this function.
+            # but we will certainly NEED THIS FUNCTION IN MOVE GENERATION
+            # TODO: Implement this function into move generation...
             if final_col == 8:
                 final_col == 0
             elif final_col == -1:
@@ -245,11 +248,11 @@ class Board:
             return False
 
         def check_knight_jump():
-            if ( # Checking for various possible 'L' shapes.
+            if (  # Checking for various possible 'L' shapes.
                 (abs(vertical_distance) == abs(horizontal_distance) == 2)
                 or (abs(horizontal_distance) == 3 and abs(vertical_distance == 1))
                 or (abs(vertical_distance) == 3 and abs(horizontal_distance == 1))
-            ):  
+            ):
                 # Confirming that a piece is indeed taken (on a square in an otherwise step location) to do the 2 x 2 'L' jump
                 return (
                     self.piece_at(
@@ -266,41 +269,88 @@ class Board:
                         )
                     )
                     != 0
-                ) 
+                )
             return False
 
-        def check_bishop_jump(isFirstJump = isFirstJumpOverall):
-            if isFirstJump: # bishop has no limit on how far it can go before taking a piece
-                return self.piece_at((start_row + vertical_distance - vd, start_col + horizontal_distance - hd)) != 0
-            else: # Setting a square of 1 as the 'take piece' radius. Bishops move diagonally, like checkers queens. 
+        def check_bishop_jump(isFirstJump=isFirstJumpOverall):
+            if (
+                isFirstJump
+            ):  # bishop has no limit on how far it can go before taking a piece
+                return (
+                    self.piece_at(
+                        (
+                            start_row + vertical_distance - vd,
+                            start_col + horizontal_distance - hd,
+                        )
+                    )
+                    != 0
+                )
+            else:  # Setting a square of 1 as the 'take piece' radius. Bishops move diagonally, like checkers queens.
                 if abs(horizontal_distance) == abs(vertical_distance) == 2:
-                    return self.piece_at((start_row + vertical_distance - vd, start_col + horizontal_distance - hd)) != 0
+                    return (
+                        self.piece_at(
+                            (
+                                start_row + vertical_distance - vd,
+                                start_col + horizontal_distance - hd,
+                            )
+                        )
+                        != 0
+                    )
             return False
 
-        def check_rook_jump(isFirstJump = isFirstJumpOverall):
-            if isFirstJump: # rook also has no limit on how far it can go before taking a piece 
+        def check_rook_jump(isFirstJump=isFirstJumpOverall):
+            if (
+                isFirstJump
+            ):  # rook also has no limit on how far it can go before taking a piece
                 if vertical_distance == 0:
-                    return self.piece_at((start_row, start_col + horizontal_distance - hd)) != 0
+                    return (
+                        self.piece_at((start_row, start_col + horizontal_distance - hd))
+                        != 0
+                    )
                 elif horizontal_distance == 0:
-                    return self.piece_at((start_row + vertical_distance - vd, start_col)) != 0
-            else: # Sets a taking radius of 1 square on the rook: it jumps over pieces and takes laterally. 
+                    return (
+                        self.piece_at((start_row + vertical_distance - vd, start_col))
+                        != 0
+                    )
+            else:  # Sets a taking radius of 1 square on the rook: it jumps over pieces and takes laterally.
                 if abs(horizontal_distance) == 2 and vertical_distance == 0:
-                    return self.piece_at(start_row, start_col + horizontal_distance - hd) != 0
+                    return (
+                        self.piece_at(start_row, start_col + horizontal_distance - hd)
+                        != 0
+                    )
                 elif abs(vertical_distance) == 2 and horizontal_distance == 0:
-                    return self.piece_at((start_row + vertical_distance - vd, start_col)) != 0
+                    return (
+                        self.piece_at((start_row + vertical_distance - vd, start_col))
+                        != 0
+                    )
             return False
 
-        def check_queen_jump(isFirstJump = isFirstJumpOverall):
-            if isFirstJump: # Queen also has no limit on how far it can go before taking a piece 
+        def check_queen_jump(isFirstJump=isFirstJumpOverall):
+            if (
+                isFirstJump
+            ):  # Queen also has no limit on how far it can go before taking a piece
                 return check_rook_jump() or check_bishop_jump()
-            else:# Sets a taking radius of 1 square on the queen: it jumps over pieces and takes laterally.
-                return check_rook_jump(isFirstJump=False) or check_bishop_jump(isFirstJump=False)
+            else:  # Sets a taking radius of 1 square on the queen: it jumps over pieces and takes laterally.
+                return check_rook_jump(isFirstJump=False) or check_bishop_jump(
+                    isFirstJump=False
+                )
             # TODO: implement queen's limitations if this doesn't work...queens can move like Rooks OR Bishops, not like both in 1 turn
 
         def check_king_jump():
             if abs(horizontal_distance) == 2 or abs(vertical_distance) == 2:
                 # Checking all squares around like a rook AND Bishop in a 1 square diagonal, since kings can take in any direction when they're on a spree
-                return self.piece_at((start_row + vertical_distance - vd, start_col)) != 0 or self.piece_at(start_row, start_col + horizontal_distance - hd) != 0 or self.piece_at((start_row + vertical_distance - vd, start_col + horizontal_distance - hd)) != 0 
+                return (
+                    self.piece_at((start_row + vertical_distance - vd, start_col)) != 0
+                    or self.piece_at(start_row, start_col + horizontal_distance - hd)
+                    != 0
+                    or self.piece_at(
+                        (
+                            start_row + vertical_distance - vd,
+                            start_col + horizontal_distance - hd,
+                        )
+                    )
+                    != 0
+                )
 
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
         if abs(piece) == 1:
@@ -315,5 +365,5 @@ class Board:
             check_queen_jump()
         else:
             check_king_jump()
-
-# TODO: implement actual move generation and use these functions to check. 
+            
+# TODO: implement actual move generation and use these functions to check.
