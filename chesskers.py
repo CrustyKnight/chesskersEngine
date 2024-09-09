@@ -133,11 +133,6 @@ R N B Q K B N R
     def legal_move(self, move):
         return True if move in self.legal_moves else False
 
-    # boolean that returns whether or not a given move is legal
-    # no need for stuff like pseudo-legality because there isn't check in this game
-    def legal_move(self, move):
-        return True if move in self.legal_moves else False
-
     # In chesskers, we define moves as having 2 types: steps and jumps
     # A step is when a piece moves to an empty square, in which case it moves like a normal chess piece
     # A jump is defined as when a piece takes a piece, upon which it must land on a 'consecutive' empty square.
@@ -470,15 +465,13 @@ R N B Q K B N R
 
         return M
                 
-            
-
-
     def calc_moves(self):
         pass
 
     def square_moves(self, square):
         p = self.piece_at(square)
 
+    # Actual move generation done here for steps
     def square_steps(self, square):
         def direxp(direction):
             sqs = []
@@ -529,6 +522,7 @@ R N B Q K B N R
 
         return [lambda: [], pawn, knight, bishop, rook, queen, king][abs(p)]()
 
+    # Actual move jump generation function. 
     def square_jumps(self, square, ctx=None):
         # ctx is really just for the queen right now.
         # it will be a map { queen: ("diag"|"straight")}
