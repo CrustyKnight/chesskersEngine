@@ -1,10 +1,10 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
 # Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
 
-def map(l, fun):
+def map(l, fun, board, depth):
     ret = []
     for L in l:
-        ret.append(fun(L))
+        ret.append(fun(L, board, depth))
 
     return ret
 
@@ -119,7 +119,7 @@ def find_best_move(board, depth):
     white = True if board.turn == board.white else False 
 
     if white:
-        return max(map(board.moves, evaluate_move(move, board, depth)), key=lambda m : m[0])[1]
+        return max(map(board.moves, evaluate_move, board, depth), key=lambda m : m[0])[1]
     else:
-        return min(map(board.moves, evaluate_move(move, board, depth)), key=lambda m : m[0])[1]
+        return min(map(board.moves, evaluate_move, board, depth), key=lambda m : m[0])[1]
      
