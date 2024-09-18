@@ -9,8 +9,6 @@ def map(l, fun, board, depth):
 
     return ret
 
-evaluate = sevaluate
-
 val_map = {
     0: 0,
     1: 1,
