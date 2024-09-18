@@ -2,6 +2,7 @@
 from bot import find_best_move
 from bot import val_map
 
+from bot import val_map
 # yay
 
 
