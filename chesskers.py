@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from bot import find_best_move
+from bot import val_map
 # yay
 
 class Board:

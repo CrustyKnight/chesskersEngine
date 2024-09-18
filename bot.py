@@ -8,7 +8,7 @@ def map(l, fun, board, depth):
 
     return ret
 
-evaluate = sevaluate 
+evaluate = sevaluate
 
 val_map = {
 
@@ -28,7 +28,7 @@ val_map = {
 
 }
 
-def sevaluate_board(board):
+def sevaluate(board):
     total = 0
 
     for row in board.squares:
