@@ -106,9 +106,7 @@ class Display:  # The main class behind this file.
          . . . . . . . .
          P P P P P P P P
          R N B Q K B N R"""
-        self.board = Board(
-            board, fen=True
-        )  # Creating a board object from starting position.
+        self.board = Board()  # Creating a board object from starting position.
         self.config = Config()
         self.squares = self.draw_squares(surface)
 
@@ -125,6 +123,7 @@ class Display:  # The main class behind this file.
                 # Rect
                 rect = (col * SQSIZE, row * SQSIZE, SQSIZE, SQSIZE)
                 # Blit
+
                 pygame.draw.rect(surface, color, rect)
                 # Row coordinates (chess notation board labels by ranks)
                 if col == 0:
@@ -149,50 +148,36 @@ class Display:  # The main class behind this file.
 
     # TODO: Fix pieces to ensure that they reflect numberboard.
     def show_pieces(self, surface):
-        def create_texture(color, name, size=80):
+        def create_texture(
+            color, name, size=80
+        ):  # takes in string arguments of piece color and piece name, returns images from assets folder.
             return os.path.join(f"assets/images/imgs-{size}px/{color}_{name}.png")
 
         for row in range(ROWS):
             for col in range(COLS):
                 if self.board.piece_at((row, col)) != 0:
                     piece = self.board.piece_at((row, col))
-                    if abs(piece) == 1:
-                        if piece == 1:
-                            texture = create_texture("white", "pawn")
-                        else:
-                            texture = create_texture("black", "pawn")
-                    elif abs(piece) == 7:
-                        if piece == 7:
-                            texture = create_texture("white", "knight")
-                        else:
-                            texture = create_texture("black", "knight")
-                    elif abs(piece) == 4:
-                        if piece == 4:
-                            texture = create_texture("white", "bishop")
-                        else:
-                            texture = create_texture("black", "bishop")
-                    elif abs(piece) == 5:
-                        if piece == 5:
-                            texture = create_texture("white", "rook")
-                        else:
-                            texture = create_texture("black", "rook")
-                    elif abs(piece) == 6:
-                        if piece == 6:
-                            texture = create_texture("white", "queen")
-                        else:
-                            texture = create_texture("black", "queen")
-                    elif abs(piece) == 10000:
-                        if piece == 10000:
-                            texture = create_texture("white", "king")
-                        else:
-                            texture = create_texture("black", "king")
+                    # Iterating through all the possible pieces and passing arguments through create_texture() without a huge if/else jungle
+                    pieces_list = [
+                        "empty",
+                        "pawn",
+                        "knight",
+                        "bishop",
+                        "rook",
+                        "queen",
+                        "king",
+                    ]
+                    texture = create_texture(
+                        "white" if piece > 0 else "black", pieces_list[abs(piece)]
+                    )
+                    # Loading piece image and blitting it.
                     image = pygame.image.load(texture)
                     img_center = (
                         col * SQSIZE + SQSIZE // 2,
                         row * SQSIZE + SQSIZE // 2,
                     )
-                    piece.texture_rect = image.get_rect(center=img_center)
-                    surface.blit(image, piece.texture_rect)
+                    texture_rect = image.get_rect(center=img_center)
+                    surface.blit(image, texture_rect)
 
     def update_board(self, surface):
         self.show_pieces(surface)

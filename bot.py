@@ -9,6 +9,7 @@ def map(l, fun, board, depth):
 
     return ret
 
+
 val_map = {
     0: 0,
     1: 1,
@@ -35,7 +36,9 @@ def sevaluate(board):
 
     return total
 
+
 evaluate = sevaluate
+
 
 def evaluate_move(move, board, depth):
     # change if needed
