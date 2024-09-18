@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from bot import find_best_move
+from bot import val_map
 
+from bot import val_map
 # yay
 
 
@@ -428,8 +430,8 @@ R N B Q K B N R
 
         # for e4e5 and cases like that
         def parse_move(move):
-            start = board.squares[val_map[move[0]]][int(move[1])]
-            end = board.squares[val_map[move[2]]][int(move[3])]
+            start = self.squares[val_map[move[0]]][int(move[1])]
+            end = self.squares[val_map[move[2]]][int(move[3])]
             return [(start, end, end)]
 
         # move notation: e2e6te7
@@ -451,9 +453,9 @@ R N B Q K B N R
                 # splitting in order to grab the 3 squares
                 name = move.split("t")
 
-                start = board.squares[val_map[name[0][0]]][int(name[0][1])]
-                end = board.squares[val_map[name[0][2]]][int(name[0][3])]
-                hop = board.squares[val_map[name[1][0]]][int(name[1][1])]
+                start = self.squares[val_map[name[0][0]]][int(name[0][1])]
+                end = self.squares[val_map[name[0][2]]][int(name[0][3])]
+                hop = self.squares[val_map[name[1][0]]][int(name[1][1])]
 
                 M.append((start, end, hop))
 

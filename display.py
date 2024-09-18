@@ -11,7 +11,7 @@ BOARD_WIDTH = 800
 # Board Dimensions
 ROWS = 8
 COLS = 8
-SQSIZE = (BOARD_WIDTH) // COLS # Size of each individual square... 
+SQSIZE = (BOARD_WIDTH) // COLS  # Size of each individual square...
 
 
 class Color:  # Class for creating colors: to be used below in Theme
@@ -21,7 +21,7 @@ class Color:  # Class for creating colors: to be used below in Theme
         pygame.init()
 
 
-class Theme: # Class for creating color schemes of board. 
+class Theme:  # Class for creating color schemes of board.
     def __init__(
         self, light_bg, dark_bg, light_trace, dark_trace, light_moves, dark_moves
     ):
@@ -30,7 +30,7 @@ class Theme: # Class for creating color schemes of board.
         self.moves = Color(light_moves, dark_moves)
 
 
-class Sound: # Uses paths to assets file to create Sound objects. 
+class Sound:  # Uses paths to assets file to create Sound objects.
     def __init__(self, path):
         self.path = path
         self.sound = pygame.mixer.Sound(path)
@@ -39,7 +39,7 @@ class Sound: # Uses paths to assets file to create Sound objects.
         pygame.mixer.Sound.play(self.sound)
 
 
-class Config: # Combines themes and sounds into Config objects. 
+class Config:  # Combines themes and sounds into Config objects.
     def __init__(self):
         self.themes = []
         self._add_themes()
@@ -94,7 +94,7 @@ class Config: # Combines themes and sounds into Config objects.
         self.themes = [green, blue, brown, gray]
 
 
-class Display: # The main class behind this file. 
+class Display:  # The main class behind this file.
     def __init__(self, surface):
         # Initializing starting board to have a board to draw...
         board = """put other data here
@@ -106,7 +106,7 @@ class Display: # The main class behind this file.
          . . . . . . . .
          P P P P P P P P
          R N B Q K B N R"""
-        self.board = Board(board, fen=True)  # Creating a board object from starting position.
+        self.board = Board()  # Creating a board object from starting position.
         self.config = Config()
         self.squares = self.draw_squares(surface)
 
@@ -114,7 +114,8 @@ class Display: # The main class behind this file.
         def get_alphacol(col):
             ALPHACOLS = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
             return ALPHACOLS[col]
-        theme = self.config.themes[0] # green theme...
+
+        theme = self.config.themes[0]  # green theme...
         for row in range(ROWS):
             for col in range(COLS):
                 # Color
@@ -122,6 +123,7 @@ class Display: # The main class behind this file.
                 # Rect
                 rect = (col * SQSIZE, row * SQSIZE, SQSIZE, SQSIZE)
                 # Blit
+
                 pygame.draw.rect(surface, color, rect)
                 # Row coordinates (chess notation board labels by ranks)
                 if col == 0:
@@ -144,52 +146,39 @@ class Display: # The main class behind this file.
         new_rect = (800, 0, 200, 800)
         pygame.draw.rect(surface, (255, 255, 255), new_rect)
 
-    # TODO: Fix pieces to ensure that they reflect numberboard. 
-    def show_pieces(self, surface): 
-        def create_texture(color, name, size=80):
-           return os.path.join(f"assets/images/imgs-{size}px/{color}_{name}.png")
+    # TODO: Fix pieces to ensure that they reflect numberboard.
+    def show_pieces(self, surface):
+        def create_texture(
+            color, name, size=80
+        ):  # takes in string arguments of piece color and piece name, returns images from assets folder.
+            return os.path.join(f"assets/images/imgs-{size}px/{color}_{name}.png")
+
         for row in range(ROWS):
-            for col in range(COLS): 
+            for col in range(COLS):
                 if self.board.piece_at((row, col)) != 0:
                     piece = self.board.piece_at((row, col))
-                    if abs(piece) == 1:
-                        if piece == 1:
-                            texture = create_texture("white", "pawn")
-                        else:
-                            texture = create_texture("black", "pawn")
-                    elif abs(piece) == 7:
-                        if piece == 7:
-                            texture = create_texture("white", "knight")
-                        else:
-                            texture = create_texture("black", "knight")
-                    elif abs(piece) == 4:
-                        if piece == 4:
-                            texture = create_texture("white", "bishop")
-                        else:
-                            texture = create_texture("black", "bishop")
-                    elif abs(piece) == 5:
-                        if piece == 5:
-                            texture = create_texture("white", "rook")
-                        else:
-                            texture = create_texture("black", "rook")
-                    elif abs(piece) == 6:
-                        if piece == 6:
-                            texture = create_texture("white", "queen")
-                        else:
-                            texture = create_texture("black", "queen")
-                    elif abs(piece) == 10000:
-                        if piece == 10000:
-                            texture = create_texture("white", "king")
-                        else:
-                            texture = create_texture("black", "king")
+                    # Iterating through all the possible pieces and passing arguments through create_texture() without a huge if/else jungle
+                    pieces_list = [
+                        "empty",
+                        "pawn",
+                        "knight",
+                        "bishop",
+                        "rook",
+                        "queen",
+                        "king",
+                    ]
+                    texture = create_texture(
+                        "white" if piece > 0 else "black", pieces_list[abs(piece)]
+                    )
+                    # Loading piece image and blitting it.
                     image = pygame.image.load(texture)
                     img_center = (
-                            col * SQSIZE + SQSIZE // 2,
-                            row * SQSIZE + SQSIZE // 2,
-                        )
-                    piece.texture_rect = image.get_rect(center=img_center)
-                    surface.blit(image, piece.texture_rect)
-    
+                        col * SQSIZE + SQSIZE // 2,
+                        row * SQSIZE + SQSIZE // 2,
+                    )
+                    texture_rect = image.get_rect(center=img_center)
+                    surface.blit(image, texture_rect)
+
     def update_board(self, surface):
         self.show_pieces(surface)
 
