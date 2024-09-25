@@ -25,6 +25,7 @@ P P P P P P P P
 R N B Q K B N R
 """,
     ):
+        self.moves_made = []
         self.squares = [[0 for i in range(8)] for i in range(8)]
         if fen:
             self.squares = self.from_fen_string(board)
@@ -146,6 +147,35 @@ R N B Q K B N R
     # and like how checkers pieces can only land on a certain square (which must be empty) after jumping over the taken piece.
     # If this 'consecutive' empty square is not empty, then the piece cannot be taken.
     # Jumps are illustrated and described in further detail in our planning guide pdf.
+
+    # enjoy my wonky syntax
+    def step(self, step):
+        start, end = step
+        s1, s2 = start
+        e1, e2 = end
+        piece = self.piece_at(self.squares[s1][s2])
+        self.squares[e1][e2] = piece
+        self.squares[s1][s2] = 0
+
+    def jump(self, jump):
+        start, end, j = jump
+        s1, s2 = start
+        e1, e2 = end
+        j1, j2 = j
+        piece = self.piece_at(self.squares[s1][s2])
+
+        self.squares[s1][s2] = 0
+        self.squares[e1][e2] = 0
+        self.squares[j1][j2] = piece
+
+    # move is the datatype we agreed on 
+    def push(self, move):
+        self.moves_made.append(move)
+        if len(move[0]) == 2:
+            step(move[0])
+        else:
+            for m in move:
+                jump(move[i])
 
     def check_valid_step(  # This function is used to VALIDATE steps, ie non-piece-taking moves
         self, start, end
