@@ -4,6 +4,16 @@ from bot import val_map
 
 from bot import val_map
 
+
+from typing import TypeAlias
+
+Square: TypeAlias = tuple[int, int]
+Piece: TypeAlias = type[int]  # should be in a certain range
+Step: TypeAlias = tuple[Square, Square]
+Jump: TypeAlias = tuple[Square, Square, Square]
+JumpMove: TypeAlias = list[Jump]
+Move: TypeAlias = JumpMove | Step
+
 # yay
 
 
@@ -487,15 +497,6 @@ R N B Q K B N R
 
     def calc_moves(self):
         pass
-
-    from typing import TypeAlias
-
-    Square: TypeAlias = tuple[int, int]
-    Piece: TypeAlias = type[int]  # should be in a certain range
-    Step: TypeAlias = tuple[Square, Square]
-    Jump: TypeAlias = tuple[Square, Square, Square]
-    JumpMove: TypeAlias = list[Jump]
-    Move: TypeAlias = JumpMove | Step
 
     def square_moves(self, square: Square) -> Piece:
         p = self.piece_at(square)
