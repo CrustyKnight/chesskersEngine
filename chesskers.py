@@ -677,10 +677,32 @@ R N B Q K B N R
             else:
                 return rook()
 
+        def king():
+            moves = [
+                (-1, 1),
+                (0, 1),
+                (1, 1),
+                (-1, 0),
+                (1, 0),
+                (-1, -1),
+                (0, -1),
+                (1, -1),
+            ]
+            moves = [add_tuple(square, m) for m in moves]
+            moves = [m for m in moves if in_bounds(m) and not self.empty(m)]
+            moves = [
+                (mv, add_dir(mv))
+                for mv in moves
+                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
+            ]
+            return moves
+
         # if abs(p) == 1:
         #    return pawn()
         # if abs(p) == 2:
         #    return knight()
+        dispatch = [lambda x: [], pawn, knight, bishop, rook, queen, king]
+        return dispatch[abs(p)]
 
     def empty(self, square):
         return 0 == self.piece_at(square)
