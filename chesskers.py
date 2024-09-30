@@ -3,7 +3,31 @@ from bot import find_best_move
 from bot import val_map
 
 from bot import val_map
+
 # yay
+
+
+# For tracking en-passant:
+# One way is to create a type of phantom piece that is created whenever a pawn moves 2 spaces, and deleted on all other moves.
+# Might be a bit inefficent if you have to scan the board for the phantom piece after every full move.
+# This could be alleviated by also keeping track of the position of it.
+# The phantom piece just allows the jump generation to not have to worry about en-passant as an edge case.
+# (It would be phantom by just having the same sprite as an empty square, or we could even visually indicate it with a litle pawn afterimage)
+#  ^(afterimage) could be fun
+
+# En-passant edge case to figure out.
+# If a pawn moves 2 spaces, and then another pawn, which is not right next to them, does jumps such that it is now right next to them, can it do en-passant?
+# e.g.
+# r n b q k b n r |=> r n b q k b n r |=> r n b q k b n r |-> r n b q k b n r
+# p . p p p p p p |=> p . . p p p p p |=> p . . p p p p p |-> p P . p p p p p
+# . . . . . . . . |=> . . . . . . . . |=> . . . . . . . . |-> . . . . . . . .
+# . . . . . . . . |=> . . p . . . . . |=> . . p P . . . . |-> . . . . . . . .
+# . . . . p . . . |=> . . . . p . . . |=> . . . . . . . . |-> . . . . . . . .
+# . . . . . P . . |=> . . . . . P . . |=> . . . . . . . . |-> . . . . . . . .
+# P P P P P . P P |=> P P P P P P P P |=> P P P P P P P P |-> P P P P P P P P
+# R N B Q K B N R |=> R N B Q K B N R |=> R N B Q K B N R |-> R N B Q K B N R
+#
+# where |=> means one full turn, and |-> means a submove
 
 
 class Board:
