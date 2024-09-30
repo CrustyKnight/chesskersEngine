@@ -488,11 +488,20 @@ R N B Q K B N R
     def calc_moves(self):
         pass
 
-    def square_moves(self, square):
+    from typing import TypeAlias
+
+    Square: TypeAlias = tuple[int, int]
+    Piece: TypeAlias = type[int]  # should be in a certain range
+    Step: TypeAlias = tuple[Square, Square]
+    Jump: TypeAlias = tuple[Square, Square, Square]
+    JumpMove: TypeAlias = list[Jump]
+    Move: TypeAlias = JumpMove | Step
+
+    def square_moves(self, square: Square) -> Piece:
         p = self.piece_at(square)
 
     # Actual move generation done here for steps
-    def square_steps(self, square):
+    def square_steps(self, square) -> list[Step]:
         def direxp(direction):
             sqs = []
             sq = add_tuple(square, direction)
@@ -565,7 +574,7 @@ R N B Q K B N R
         return [lambda: [], pawn, knight, bishop, rook, queen, king][abs(p)]()
 
     # Actual move jump generation function.
-    def square_jumps(self, square, ctx=None):
+    def square_jumps(self, square: Square, ctx=None) -> list[Jump]:
         # ctx is really just for the queen right now.
         # it will be a map { queen: ("diag"|"straight")}
         # maybe later it will just become a number (if efficiency matters super)
@@ -703,6 +712,43 @@ R N B Q K B N R
         #    return knight()
         dispatch = [lambda x: [], pawn, knight, bishop, rook, queen, king]
         return dispatch[abs(p)]
+
+    def square_jumps_recursive(self, square: Square, ctx=None) -> list[JumpMove] | None:
+        def new_ctx(jump):
+            # Basically, see if the queen jumped, and if so, which way
+            pass
+
+        jumps: list[Jump] = square_jumps(self, square, ctx)
+
+        # Base case is there is no more jumps possible from that square
+        # One above that is the piece could make some jumps.
+        # What I want this to return is a list of moves I can prepend a jump to
+
+        if len(jumps) == 0:
+            return None
+
+        # TODO implement Board.copy() and Board.do_jump(Jump)
+
+        def next_level(jump):
+            nb = self.copy()  # Copy board
+            nb.do_jump(jump)  # Execute move
+            ctx = new_ctx(jump)
+            # Get the new ctx (see if queen jumped diag or straight basically)
+            return nb.square_jumps_recursive(self, jump_end(square), ctx)
+            # Check for more jumps this piece can do (so look at where it landed)
+            #
+
+        output: list[JumpMove] = []
+        for jump in jumps:
+            next_jumps: list[JumpMoves] = next_level(jump)
+            if next_jumps == None:
+                output.extend([jump])  # [jump] is a valid JumpMove
+            else:
+                for next_jump in next_jumps:
+                    output.extend([jump] + next_jump)
+        # This feels mostly complete/roughed out, but the base case feels wrong.
+        # Also, what will the data type this outputs be? (/ what will the format be?)
+        return output
 
     def empty(self, square):
         return 0 == self.piece_at(square)
