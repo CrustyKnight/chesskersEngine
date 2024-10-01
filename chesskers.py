@@ -762,26 +762,41 @@ R N B Q K B N R
 
         # TODO implement Board.copy() and Board.do_jump(Jump)
 
-        def next_level(jump):
+        def next_level(jump: Jump) -> list[JumpMove] | None:
             nb = self.copy()  # Copy board
             nb.do_jump(jump)  # Execute move
-            ctx = new_ctx(jump)
+            ctx = new_qctx(jump)
             # Get the new ctx (see if queen jumped diag or straight basically)
-            return nb.square_jumps_recursive(self, jump_end(square), ctx)
+            return nb.square_jumps_recursive(jump_end(jump), ctx)
             # Check for more jumps this piece can do (so look at where it landed)
             #
 
         output: list[JumpMove] = []
         for jump in jumps:
-            next_jumps: list[JumpMoves] = next_level(jump)
+            next_jumps: list[JumpMove] | None = next_level(jump)
             if next_jumps == None:
-                output.extend([jump])  # [jump] is a valid JumpMove
+                output.append([jump])  # [jump] is a valid JumpMove
             else:
                 for next_jump in next_jumps:
-                    output.extend([jump] + next_jump)
+                    output.append([jump] + next_jump)
         # This feels mostly complete/roughed out, but the base case feels wrong.
         # Also, what will the data type this outputs be? (/ what will the format be?)
         return output
 
-    def empty(self, square):
+    def empty(self, square: Square) -> bool:
         return 0 == self.piece_at(square)
+
+    def copy(self):
+        return Board(False, self.__str__())
+
+    def do_jump(self, jump: Jump):
+        # assume it is valid
+        (start, take, land) = jump
+        p = self.piece_at(start)
+        self.put_at(0, start)
+        self.put_at(0, take)
+        self.put_at(p, land)
+
+    def put_at(self, p: Piece, sq: Square):
+        r, c = sq
+        self.squares[r][c] = p
