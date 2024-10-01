@@ -2,17 +2,19 @@
 from bot import find_best_move
 from bot import val_map
 
-from bot import val_map
+
+from typing import Literal, TypeAlias, override
 
 
-from typing import TypeAlias
-
+Direction: TypeAlias = tuple[int, int]
 Square: TypeAlias = tuple[int, int]
-Piece: TypeAlias = type[int]  # should be in a certain range
+Piece: TypeAlias = Literal[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6]
 Step: TypeAlias = tuple[Square, Square]
 Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
+QueenContext: TypeAlias = None | Literal["diag", "straight"]
+
 
 # yay
 
