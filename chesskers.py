@@ -3,7 +3,7 @@ from bot import find_best_move
 from bot import val_map
 
 
-from typing import Literal, TypeAlias, override
+from typing import Literal, TypeAlias
 
 
 Direction: TypeAlias = tuple[int, int]
@@ -40,6 +40,8 @@ QueenContext: TypeAlias = None | Literal["diag", "straight"]
 # R N B Q K B N R |=> R N B Q K B N R |=> R N B Q K B N R |-> R N B Q K B N R
 #
 # where |=> means one full turn, and |-> means a submove
+#
+# SOLVED: En-Passant has to be the first jump
 
 
 class Board:
@@ -119,7 +121,6 @@ R N B Q K B N R
             self.squares[y][x] = d[token]
             counter += 1
 
-    @override
     def __str__(self):
         # TODO make sure this prints out the same format from_str takes in (right now it does not include the extra data line)
         d = {
@@ -773,7 +774,7 @@ R N B Q K B N R
 
         output: list[JumpMove] = []
         for jump in jumps:
-            next_jumps: list[JumpMove] | None = next_level(jump)
+            next_jumps = next_level(jump)
             if next_jumps == None:
                 output.append([jump])  # [jump] is a valid JumpMove
             else:
@@ -791,6 +792,7 @@ R N B Q K B N R
 
     def do_jump(self, jump: Jump):
         # assume it is valid
+        # handle en-passant
         (start, take, land) = jump
         p = self.piece_at(start)
         self.put_at(0, start)
