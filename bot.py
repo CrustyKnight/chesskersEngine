@@ -63,7 +63,7 @@ def alphabeta(board, depth):
         #   "nFav" : knights are pushed to the front
         #   other standard move ordering heuristics
 
-        return sorted(moves, key=lambda x: evalmove(x[0]))
+        return sorted(moves, key=lambda x: -evalmove(x[0]))
 
     def abmax(board, depth, alpha, beta):
         if depth == 1:
