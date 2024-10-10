@@ -1,6 +1,13 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
 # Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
+from typing import Literal, TypeAlias, override
 
+Square: TypeAlias = tuple[int, int]
+Board: TypeAlias = list[list[int]]
+Step: TypeAlias = tuple[Square, Square]
+Jump: TypeAlias = tuple[Square, Square, Square]
+JumpMove: TypeAlias = list[Jump]
+Move: TypeAlias = JumpMove | Step
 
 def map(l, fun, board, depth):
     ret = []
@@ -26,7 +33,7 @@ val_map = {
 }
 
 
-def sevaluate(board):
+def sevaluate(board: Board) -> int:
     total = 0
 
     for row in board.squares:
@@ -39,7 +46,7 @@ def sevaluate(board):
 evaluate = sevaluate
 
 
-def evaluate_move(move, board, depth):
+def evaluate_move(move: Move, board: Board, depth:int):
     # change if needed
     tb = board.copy()
     tb.move(move)
@@ -48,24 +55,25 @@ def evaluate_move(move, board, depth):
     return [score, move]
 
 
-def alphabeta(board, depth):
+def alphabeta(board:Board, depth:int) -> int | float:
 
-    def evalmove(move, board):
+    def evalmove(move: Move, board:list[list[int]]) -> int | float:
         # change if needed
         tb = board.copy()
         tb.move(move)
 
         return evaluate(tb)
 
-    def order_moves(moves, board):
+    # not here for now but later move ordering algorithms will use board
+    def order_moves(moves: list[Move], board: Board):
         # Some heuristic ideas:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
         #   other standard move ordering heuristics
 
-        return sorted(moves, key=lambda x: -evalmove(x[0]))
+        return sorted(moves, key=lambda x: -evalmove(x, board))
 
-    def abmax(board, depth, alpha, beta):
+    def abmax(board: Board, depth: int, alpha: int, beta: int) -> int:
         if depth == 1:
             return evaluate(board)
 

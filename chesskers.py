@@ -68,6 +68,8 @@ R N B Q K B N R
             self.squares = self.from_fen_string(board)
         elif board:
             self.from_string(board)
+
+        self.legal_moves = self.calc_moves()
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -178,7 +180,7 @@ R N B Q K B N R
 
     # boolean that returns whether or not a given move is legal
     # no need for stuff like pseudo-legality because there isn't check in this game
-    def legal_move(self, move):
+    def legal_move(self, move: Move) -> bool:
         return True if move in self.legal_moves else False
 
     # In chesskers, we define moves as having 2 types: steps and jumps
@@ -280,7 +282,7 @@ R N B Q K B N R
         final_row, final_col = end
         piece = self.piece_at(
             start
-        )  # this piece will be checked in value to ensure it is the correct type, by looking at points.
+        )  # this piece will be checked in value to ensure it is the correct type, by looking at points.bindsym $mod+Shift+z
 
         # Vertical and horizontal distance travelled (used with vd and hd below to compute coordinates of square of piece being taken)
         vertical_distance = final_row - start_row
