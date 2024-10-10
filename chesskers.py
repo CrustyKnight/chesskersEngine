@@ -15,9 +15,7 @@ JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 QueenContext: TypeAlias = None | Literal["diag", "straight"]
 
-
 # yay
-
 
 # For tracking en-passant:
 # One way is to create a type of phantom piece that is created whenever a pawn moves 2 spaces, and deleted on all other moves.
@@ -259,18 +257,9 @@ R N B Q K B N R
             )
 
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
-        if abs(piece) == 1:
-            return check_pawn_step()
-        elif abs(piece) == 2:
-            return check_knight_step()
-        elif abs(piece) == 3:
-            return check_bishop_step()
-        elif abs(piece) == 4:
-            return check_rook_step()
-        elif abs(piece) == 5:
-            return check_queen_step()
-        else:
-            return check_king_step()
+        possible_functions = [0, check_pawn_step(), check_knight_step(), check_bishop_step(), 
+                              check_rook_step(), check_queen_step(), check_king_step()]
+        return possible_functions[abs(piece)]
 
     def check_valid_jump(  # This function is used to VALIDATE jumps, ie piece-taking moves/captures
         self, start: Square, end: Square, isFirstJumpOverall: bool = True
@@ -279,7 +268,7 @@ R N B Q K B N R
         final_row, final_col = end
         piece = self.piece_at(
             start
-        )  # this piece will be checked in value to ensure it is the correct type, by looking at points.
+        )  # this piece will be checked in value to determine what it is (knight, pawn, etc) and ensure it is moving correctly.
 
         # Vertical and horizontal distance travelled (used with vd and hd below to compute coordinates of square of piece being taken)
         vertical_distance = final_row - start_row
@@ -303,20 +292,25 @@ R N B Q K B N R
             return False
 
         # checking out of bounds: now pieces can take over the edge and teleport to the other side of the board...
-        def fix_piece_location():  # We might need this function to further account for edge effects, especially if they
+        def isFinalJump():  # We might need this function to further account for edge effects, especially if they
             # have only been accounted for in imagination. Maybe we won't need it in this function.
             # but we will certainly NEED THIS FUNCTION IN MOVE GENERATION
             # TODO: Implement this function into move generation...
             if final_col == 8:
                 final_col == 0
+                return True
             elif final_col == -1:
-                final_col = 7
-            if final_row == 8:
-                final_row = 0
-            elif final_row == -1:
-                final_row = 7
-            if not (0 <= final_row <= 7 and 0 <= final_col <= 7):
-                return False
+                final_col == 7
+                return True
+            if piece > 0:
+                if final_row == -1:
+                    final_row = 7
+                    return True
+            elif piece < 0:
+                if final_row == 8:
+                    final_row = 0
+                    return True
+            return False
 
         # Jump functions of individual pieces
         def check_pawn_jump():
@@ -446,18 +440,9 @@ R N B Q K B N R
                 )
 
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
-        if abs(piece) == 1:
-            check_pawn_jump()
-        elif abs(piece) == 2:
-            check_knight_jump()
-        elif abs(piece) == 3:
-            check_bishop_jump()
-        elif abs(piece) == 4:
-            check_rook_jump()
-        elif abs(piece) == 5:
-            check_queen_jump()
-        else:
-            check_king_jump()
+        possible_functions = [0, check_pawn_jump(), check_knight_jump(), check_bishop_jump(), 
+                              check_rook_jump(), check_queen_jump(), check_king_jump()]
+        return possible_functions[abs(piece)]
 
     def is_step(self, move: Move) -> bool:
         if len(move[0]) == 2:
@@ -644,6 +629,14 @@ R N B Q K B N R
             ]
             # TODO right now this won't allow taking around the edges. fix that
             # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
+            # Debangshu is on it!
+            possible_cols = [0, 1, 2, 3, 4, 5, 6, 7]
+            i = 0
+            for num in possible_cols:
+                i += 1
+                i %= len(possible_cols)
+                
+
             return possible_pieces
 
         def knight():
@@ -746,6 +739,8 @@ R N B Q K B N R
     ) -> list[JumpMove] | None:
         def new_qctx(jump: Jump) -> QueenContext:
             # Basically, see if the queen jumped, and if so, which way
+            # Straight or Diagonal???
+            # if not isQueenJump ==> 
             pass
 
         def jump_end(jump: Jump) -> Square:

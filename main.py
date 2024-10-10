@@ -12,13 +12,17 @@ class Main:
         print(self.board.squares)
         self.display.draw_board(self.screen)
 
+    def __move__(self):
+        move = input("Enter your move now")
+        
+
     def main_loop(self):
         pygame.init()
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-            
+
             self.display.draw_board(self.screen)
             pygame.display.update()
 
