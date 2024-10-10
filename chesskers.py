@@ -16,6 +16,8 @@ Move: TypeAlias = JumpMove | Step
 QueenContext: TypeAlias = None | Literal["diag", "straight"]
 
 # yay
+# YAY
+
 
 # For tracking en-passant:
 # One way is to create a type of phantom piece that is created whenever a pawn moves 2 spaces, and deleted on all other moves.
@@ -65,6 +67,8 @@ R N B Q K B N R
             self.squares = self.from_fen_string(board)
         elif board:
             self.from_string(board)
+
+        self.legal_moves = self.calc_moves()
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -175,7 +179,7 @@ R N B Q K B N R
 
     # boolean that returns whether or not a given move is legal
     # no need for stuff like pseudo-legality because there isn't check in this game
-    def legal_move(self, move):
+    def legal_move(self, move: Move) -> bool:
         return True if move in self.legal_moves else False
 
     # In chesskers, we define moves as having 2 types: steps and jumps
@@ -268,7 +272,7 @@ R N B Q K B N R
         final_row, final_col = end
         piece = self.piece_at(
             start
-        )  # this piece will be checked in value to determine what it is (knight, pawn, etc) and ensure it is moving correctly.
+        )  # this piece will be checked in value to determine what it is (knight, pawn, etc) and ensure it is moving correctly.bindsym $mod+Shift+z
 
         # Vertical and horizontal distance travelled (used with vd and hd below to compute coordinates of square of piece being taken)
         vertical_distance = final_row - start_row
@@ -461,37 +465,51 @@ R N B Q K B N R
         # This is bugged. I don't want to mess with it though.
         #   - Sam
 
+        # Fixed hopefully
+        #   - Cole
+
         # for e4e5 and cases like that
-        def parse_move(move: str):
-            start = self.squares[val_map[move[0]]][int(move[1])]
-            end = self.squares[val_map[move[2]]][int(move[3])]
-            return [(start, end, end)]
+        def parse_step(move: str) -> Step:
+            start = move[:2]
+            end = move[2:] 
+
+            s1 = square_map[start[0]]
+            s2 = int(start[1])
+
+            e1 = square_map[end[0]]
+            e2 = square_map[end[0]] 
+            return ((s1,s2), (e1,e2))
+
+        def parse_jump(move: str) -> Jump:
+            m = move.split("t")
+
+            start = m[0][:2]
+            s1 = square_map[start[0]]
+            s2 = int(start[1])
+            end = m[0][2:]
+            e1 = square_map[end[0]]
+            e2 = int(end[1])
+            hop = m[1]
+            h1 = square_map[hop[0]]
+            h2 = int(hop[1])
+
+            return ((s1,s2),(e1,e2),(h1,h2))
+
+
 
         # move notation: e2e6te7
         #                e2e6
         #                e2e6te4|e4e5te7
         square_map = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8}
 
-        if "t" not in move:
-            return parse_move(move)
-
         M = []
+        if len(move) == 4:
+            return parse_step(move)
         subs = move.split("|")
 
         for m in subs:
-            if "t" not in m:
-                M.append(parse_move(m))
-
-            else:
-                # splitting in order to grab the 3 squares
-                name = move.split("t")
-
-                start = self.squares[val_map[name[0][0]]][int(name[0][1])]
-                end = self.squares[val_map[name[0][2]]][int(name[0][3])]
-                hop = self.squares[val_map[name[1][0]]][int(name[1][1])]
-
-                M.append((start, end, hop))
-
+            M.append(parse_jump(m))
+                    
         return M
 
     def calc_moves(self):
