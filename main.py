@@ -15,7 +15,6 @@ class Main:
 
         self.board = Board()
 
-    def main_loop(self) -> None:
     def __move__(self):
         move = input("Enter your move now")
         
