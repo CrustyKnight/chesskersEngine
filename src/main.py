@@ -29,9 +29,9 @@ class Main:
             self.display.draw_board(self.screen)
             pygame.display.update()
 
-    #def pve(self) -> None:
-        
+    def pve(self) -> None:
+        print(self.board)     
 
 
 main = Main()
-main.main_loop()
+main.pve()
