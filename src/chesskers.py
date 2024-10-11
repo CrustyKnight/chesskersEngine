@@ -604,7 +604,7 @@ R N B Q K B N R
     def square_jumps(self, square: Square, qctx: QueenContext = None) -> list[Jump]:
         # ctx is really just for the queen right now.
         # it will be a map { queen: ("diag"|"straight")}
-        # maybe later it will just become a number (if efficiency matters super)
+        # maybe later it will just become a number (if efficiency matters a lot)
         def direxp(direction: Direction) -> Square:
             # TODO mod this to give the location of the piece it hits, not all the squares before
             # and give nothing if it hits the edge
@@ -631,6 +631,31 @@ R N B Q K B N R
 
         def add_dir(mv: Square):
             return add_sq_dir(mv, jump_direction(mv))
+        
+        # This method is RESPONSIBLE FOR MANAGING EDGE EFFECTS, ie, when a piece takes off the edge off the board. 
+        # TODO: if this method ever doesn't return (0, 0), then it was actually used, and the player's ("jumping") turn must end. 
+        def edge_effects(start: Square, taken: Square): # taken is the square of the taken piece
+            # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col))
+            # *** This method executes edge effects for jumps if they're necessary and/or possible*** 
+            edge_effects_exist = True
+            if (taken[0] == 0 and self.piece_at(start) > 0 and jump_direction(taken)[0] < 0):
+            # Checking for white taking over black's starting rows    
+                sq_row = 7
+            elif (taken[0] == 7 and self.piece_at(start) < 0 and jump_direction(taken)[0] < 0):
+            # or for black taking over white's starting rows.
+                sq_row = 0
+            if (taken[1] == 0 and jump_direction(taken)[1] < 0):
+            # Adjusting piece's final column for taking off of left column
+                sq_col = 7
+            elif (taken[1] == 7 and jump_direction(taken)[1] > 0):
+            # Adjusting piece's final column for taking off of right column
+                sq_col = 0
+            else: edge_effects_exist = False
+            if edge_effects_exist:
+                sq:Square = (sq_row, sq_col)
+                return sq
+            else:
+                return(0, 0)
 
         def pawn():
 
@@ -653,7 +678,6 @@ R N B Q K B N R
             for num in possible_cols:
                 i += 1
                 i %= len(possible_cols)
-                
 
             return possible_pieces
 
