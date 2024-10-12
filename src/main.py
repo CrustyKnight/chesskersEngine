@@ -18,9 +18,11 @@ class Main:
     def __move__(self):
         move = input("Enter your move now")
         self.board.from_UCN(move)
-
         # Recalling the dictionary for different files (a, b, c) by converting them to row. 
         col_dict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+        # Using move properties to discern row and col of the start and 
+        start_row = col_dict[move[0]]
+        start_col
 
     def main_loop(self):
         pygame.init()
@@ -33,9 +35,18 @@ class Main:
             self.display.draw_board(self.screen)
             pygame.display.update()
 
-    #def pve(self) -> None:
-        
+    def pve(self, surface) -> None:
+        _ = pygame.init()
+        while True:
+            self.display.draw_board(surface)
+            move = self.board.from_UCN(input("")) 
+            print(move)
+            self.board.do_move(move)
+            print(self.board)
+            self.display.update_board(surface)
+            
+
 
 
 main = Main()
-main.main_loop()
+main.pve()

@@ -142,6 +142,7 @@ class Display:  # The main class behind this file.
         self.config = Config()
         self.squares = self.draw_squares(surface)
 
+    #Yay
     def draw_squares(self, surface):
         def get_alphacol(col):
             ALPHACOLS = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
@@ -214,6 +215,6 @@ class Display:  # The main class behind this file.
     def update_board(self, surface):
         self.show_pieces(surface)
 
-    def draw_board(self, surface):
+    def draw_board(self, surface) -> None:
         self.draw_squares(surface)
         self.show_pieces(surface)
