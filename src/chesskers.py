@@ -567,12 +567,13 @@ R N B Q K B N R
             return moves
 
         def bishop():
-            directions: list[Direction] = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-            # travel in each direction until I hit a piece or the end of the board
+            directions: list[Direction] [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+            # travel diagonally in each direction until I hit a piece or the end of the board
             return [mv for d in directions for mv in direxp(d)]
 
         def rook():
             directions = [(1, 0), (-1, 0), (0, -1), (0, 1)]
+            # travel straight in each direction until I hit a piece or the end of the board
             return [mv for d in directions for mv in direxp(d)]
 
         def queen():
@@ -633,7 +634,7 @@ R N B Q K B N R
             return add_sq_dir(mv, jump_direction(mv))
         
         # This method is RESPONSIBLE FOR MANAGING EDGE EFFECTS, ie, when a piece takes off the edge off the board. 
-        # TODO: if this method ever doesn't return (0, 0), then it was actually used, and the player's ("jumping") turn must end. 
+        # TODO: if this method ever doesn't return (-1, -1), then it was actually used, and the player's ("jumping") turn must end. 
         def edge_effects(start: Square, taken: Square): # taken is the square of the taken piece
             # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col))
             # *** This method executes edge effects for jumps if they're necessary and/or possible*** 
@@ -651,17 +652,31 @@ R N B Q K B N R
             # Adjusting piece's final column for taking off of right column
                 sq_col = 0
             else: edge_effects_exist = False
-            if edge_effects_exist:
+            if edge_effects_exist: 
                 sq:Square = (sq_row, sq_col)
                 return sq
             else:
-                return(0, 0)
+                return(-1, -1)
+
+        def execute_edge_effects(square, moves_list): # moves_list = list of moves: this method parses through the list and replaces tuples 
+            # of destination squares off the edge of the board with onboard squares, accounting for edge effects. 
+            # square = starting square of jump
+            for i in range(0, len(moves_list)):
+                if not edge_effects(square, moves_list[i]) == (-1, -1):
+                    moves_list[i] = edge_effects(square, moves_list[i])
+            return moves_list
+
 
         def pawn():
 
             c = -1 if p < 0 else 1
             d = -c
             possible_pieces = [add_sq_dir(square, (d, 1)), add_sq_dir(square, (d, -1))]
+            # factoring in edge effects: performing the algorithm if it is actually on an edge (checking if it = (-1, -1), which 
+            # is the result of a piece not actually taking a piece on a board edge)
+            for i in range(0, len(possible_pieces)):
+                if not edge_effects(square, possible_pieces[i]) == (-1, -1):
+                    possible_pieces[i] = edge_effects(square, possible_pieces[i])
             possible_pieces = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
@@ -670,15 +685,11 @@ R N B Q K B N R
                 for mv in possible_pieces
                 if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
             ]
+
             # TODO right now this won't allow taking around the edges. fix that
             # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            # Debangshu is on it!
-            possible_cols = [0, 1, 2, 3, 4, 5, 6, 7]
-            i = 0
-            for num in possible_cols:
-                i += 1
-                i %= len(possible_cols)
-
+            # Debangshu is on it! this is his solution!!!
+            possible_pieces = execute_edge_effects(square, possible_pieces)
             return possible_pieces
 
         def knight():
@@ -706,6 +717,7 @@ R N B Q K B N R
                 mv for mv in new_moves if in_bounds(mv[1]) and self.empty(mv[1])
             ]
             # taking over the edges again
+            new_moves = execute_edge_effects(square, new_moves)
             return new_moves
 
         def bishop():
@@ -721,6 +733,8 @@ R N B Q K B N R
             ]
             # TODO right now this won't allow taking around the edges. fix that
             # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
+            # Yes he has!!!
+            moves = execute_edge_effects(square, moves)
             return moves
 
         def rook():
@@ -736,6 +750,7 @@ R N B Q K B N R
             ]
             # TODO right now this won't allow taking around the edges. fix that
             # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
+            moves = execute_edge_effects(square, moves)
             return moves
 
         def queen():
@@ -764,6 +779,7 @@ R N B Q K B N R
                 for mv in moves
                 if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
             ]
+            moves = execute_edge_effects(square, moves)
             return moves
 
         def empty() -> list[tuple[Square, Square]]:

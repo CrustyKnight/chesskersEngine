@@ -13,11 +13,14 @@ class Main:
         print(self.board.squares)
         self.display.draw_board(self.screen)
         self.board = Board()
-    
 
+    # This method needs to check and make sure 
     def __move__(self):
         move = input("Enter your move now")
-        
+        self.board.from_UCN(move)
+
+        # Recalling the dictionary for different files (a, b, c) by converting them to row. 
+        col_dict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
 
     def main_loop(self):
         pygame.init()
@@ -25,7 +28,8 @@ class Main:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.__move__()
             self.display.draw_board(self.screen)
             pygame.display.update()
 
