@@ -19,8 +19,8 @@ class Main:
         move = input("Enter your move now")
         
 
-    def main_loop(self):
-        pygame.init()
+    def mainloop(self):
+        _ = pygame.init()
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -30,7 +30,14 @@ class Main:
             pygame.display.update()
 
     def pve(self) -> None:
-        print(self.board)     
+        _ = pygame.init()
+        while True:
+            move = self.board.from_UCN(input("")) 
+            print(move)
+            self.board.do_move(move)
+            print(self.board)
+            
+
 
 
 main = Main()

@@ -214,6 +214,6 @@ class Display:  # The main class behind this file.
     def update_board(self, surface):
         self.show_pieces(surface)
 
-    def draw_board(self, surface):
+    def draw_board(self, surface) -> None:
         self.draw_squares(surface)
         self.show_pieces(surface)
