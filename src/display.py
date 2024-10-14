@@ -180,12 +180,11 @@ class Display:  # The main class behind this file.
         pygame.draw.rect(surface, (255, 255, 255), new_rect)
 
     # TODO: Fix pieces to ensure that they reflect numberboard.
-    def show_pieces(self, surface):
-        def create_texture(
-            color, name, size=80
-        ):  # takes in string arguments of piece color and piece name, returns images from assets folder.
+    def create_texture(self, color, name, size=80):  # takes in string arguments of piece color and piece name, 
+                                               # returns images from assets folder.
             return os.path.join(f"assets/images/imgs-{size}px/{color}_{name}.png")
-
+    
+    def show_pieces(self, surface):
         for row in range(ROWS):
             for col in range(COLS):
                 if self.board.piece_at((row, col)) != 0:
@@ -200,7 +199,7 @@ class Display:  # The main class behind this file.
                         "queen",
                         "king",
                     ]
-                    texture = create_texture(
+                    texture = self.create_texture(
                         "white" if piece > 0 else "black", pieces_list[abs(piece)]
                     )
                     # Loading piece image and blitting it.
