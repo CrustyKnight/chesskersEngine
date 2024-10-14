@@ -87,13 +87,17 @@ class Main:
         start_col = int(col_dict[boardUCN[0]])
         final_row = HEIGHT//SQ_SIZE - int(boardUCN[len(boardUCN) - 1])
         final_col = int(col_dict[boardUCN[len(boardUCN) - 2]])
-
-        # Tuple declarations 
+        if boardUCN.__contains__("t"):
+            taken_row = HEIGHT//SQ_SIZE - int(boardUCN[3])
+            taken_col = int(col_dict[boardUCN[2]])
+            taken = (taken_row, taken_col)
+        
+        # Tuple declarations for start and end. 
         start = (start_row, start_col)
         end = (final_row, final_col)
 
         # Jumping or stepping depending on whether or not the UCN contains a t (t is for taking a piece in which case a jump must occur). 
-        self.__jump__(surface, start, end) if boardUCN.contains("t") else self.__step__(surface, start, end)
+        self.__jump__(surface, start, taken, end) if boardUCN.__contains__("t") else self.__step__(surface, start, end)
         
         # Incrementing the turn counter
         self.turns_played += 1
