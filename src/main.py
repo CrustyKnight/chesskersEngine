@@ -106,8 +106,8 @@ class Main:
         pygame.init()
         while True:
             row, col = pygame.mouse.get_pos()
-            row //= 100
-            col //= 100
+            row //= SQ_SIZE
+            col //= SQ_SIZE
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
