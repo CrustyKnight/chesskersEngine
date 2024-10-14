@@ -1,8 +1,13 @@
 import pygame
 
 from display import Display
+import re
 
 pygame.init()
+
+
+def is_ucn(move: str) -> bool:
+    return re.search(r"([a-h][1-8]){2}|(([a-h][1-8]){2}t[a-h][1-8]\\|?)+", move) != None
 
 
 class Main:
