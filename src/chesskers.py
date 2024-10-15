@@ -513,7 +513,7 @@ R N B Q K B N R
 
     
 
-    def calc_moves(self, opts: str ="N") -> list[Move]:
+    def calc_moves(self, opts: str="N") -> list[Move]:
         def sign(n: int) -> int:
             return 1 if n > 0 else -1 if n < 0 else 0
 
@@ -658,28 +658,32 @@ R N B Q K B N R
         
         # This method is RESPONSIBLE FOR MANAGING EDGE EFFECTS, ie, when a piece takes off the edge off the board. 
         # TODO: if this method ever doesn't return (-1, -1), then it was actually used, and the player's ("jumping") turn must end. 
-        def edge_effects(start: Square, taken: Square): # taken is the square of the taken piece
-            # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col))
+        def edge_effects(final: tuple[Square,Square]) -> tuple[Square, Square]: # taken is the square of the taken piece
+            # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col), as a reminder)
             # *** This method executes edge effects for jumps if they're necessary and/or possible*** 
-            edge_effects_exist = True
-            if (taken[0] == 0 and self.piece_at(start) > 0 and jump_direction(taken)[0] < 0):
-            # Checking for white taking over black's starting rows    
-                sq_row = 7
-            elif (taken[0] == 7 and self.piece_at(start) < 0 and jump_direction(taken)[0] < 0):
-            # or for black taking over white's starting rows.
-                sq_row = 0
-            if (taken[1] == 0 and jump_direction(taken)[1] < 0):
-            # Adjusting piece's final column for taking off of left column
-                sq_col = 7
-            elif (taken[1] == 7 and jump_direction(taken)[1] > 0):
-            # Adjusting piece's final column for taking off of right column
-                sq_col = 0
-            else: edge_effects_exist = False
-            if edge_effects_exist: 
-                sq:Square = (sq_row, sq_col)
-                return sq
-            else:
-                return(-1, -1)
+            # *** This method returns the tuple of the taking then destination square IF the destination square is 'off' the edge
+                # first element in tuple = square on which piece is being taken; second element in tuple = final destination of square
+            # Reminder: square = starting square as a tuple of (row, col)
+            piece = self.piece_at(square) 
+            taken_piece = self.piece_at(final[0])
+            destination_is_empty = self.piece_at(final[1]) == 0
+            # First thing: making sure that the piece exists, is taking a piece, and is moving to an empty destination square
+            if(abs(piece) > 0 and abs(taken_piece) > 0 and destination_is_empty):
+                jd = jump_direction(final[0]) # Using jump direction to get vertical direction (vd) and horizontal direction (hd) below
+                vd = jd[0]
+                hd = jd[1]
+                # Second thing: enabling all pieces to take over the horizontal edges, or on the sides of the board. 
+                if hd == -1 and final[0][1] == 0:
+                    final[1][1] = 7
+                elif hd == 1 and final[0][1] == 7:
+                    final[1][1] = 0
+                # Third thing: enabling pieces to take over their opponent's vertical edges, on the edges where their pawns can promote
+                if vd == -1 and piece > 0 and final[0][0] == 0:
+                    final[0][1] = 7
+                elif vd == 1 and piece < 0 and final[0][0] == 7:
+                    final[0][1] = 0
+            return final
+
 
         def execute_edge_effects(square: Square, moves_list: list[Square]) -> list[Move]: # moves_list = list of moves: this method parses through the list and replaces tuples 
             # of destination squares off the edge of the board with onboard squares, accounting for edge effects. 
