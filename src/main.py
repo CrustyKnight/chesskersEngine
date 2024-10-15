@@ -117,18 +117,17 @@ class Main:
             self.display.draw_board(self.screen)
             pygame.display.update()
 
-    def pve(self, surface) -> None:
+    def pve(self) -> None:
         _ = pygame.init()
         while True:
-            self.display.draw_board(surface)
             move = self.board.from_UCN(input("")) 
-            print(move)
-            self.board.do_move(move)
-            print(self.board)
-            self.display.update_board(surface)
+            if move in board.moves: 
+                self.board.do_move(move)
+                print(self.board)
+
             
 
 
 
 main = Main()
-main.main_loop()
+_ = main.pve()

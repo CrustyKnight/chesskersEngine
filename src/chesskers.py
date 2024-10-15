@@ -14,6 +14,7 @@ Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 QueenContext: TypeAlias = None | Literal["diag", "straight"]
+Squares: TypeAlias = list[list[Piece]] 
 
 # yay
 # YAY
@@ -82,10 +83,12 @@ R N B Q K B N R
         # R N B Q K B N R
         #         """)
         # self.moves = self.calc_moves()
+        
+        self.color = 1 if self.turns % 2 == 0 else -1
+        self.turns = 0
 
-    def from_fen_string(self, string: str) -> list[list[Piece]]:
-        pass
-        # return [[0]]
+    def from_fen_string(self, string: str) -> Square:
+        return [[0]]
 
     def from_string(self, string: str):
         # Also want information pertaining to en passant squares, turn number, etc
@@ -508,9 +511,33 @@ R N B Q K B N R
                     
         return M
 
-    def calc_moves(self):
-        pass
+    
 
+    def calc_moves(self, opts: str ="N") -> list[Move]:
+        def sign(n: int) -> int:
+            return 1 if n > 0 else -1 if n < 0 else 0
+
+        moves: list[Move] = []
+
+        if opts == "N":
+            for i in range(0,8):
+                for j in range(0, 8):
+                    if self.piece_at(square=(i,j)) != 0 and sign(n=self.piece_at(square=(i,j))) == self.color:
+                        moves.append(self.square_moves(square=(i,j)))
+        elif opts == "white":
+            for i in range(0,8):
+                for j in range(0,8):
+                    if self.piece_at(square=(i,j)) != 0 and sign(n=self.piece_at(square=(i,j))) == 1:
+                        moves.append(self.square_moves(square=(i,j)))
+        # typos beware
+        else:
+            for i in range(0,8):
+                for j in range(0,8):
+                    if self.piece_at(square=(i,j)) != 0 and sign(self.piece_at(square=(i,j))) == -1:
+                        moves.append(self.square_moves(square=(i,j)))
+
+        return moves
+                    
     def square_moves(self, square: Square) -> list[Move]:
         # TODO
         p = self.piece_at(square)
@@ -563,7 +590,7 @@ R N B Q K B N R
             return moves
 
         def bishop():
-            directions: list[Direction] [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+            directions: list[Direction] = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
             # travel diagonally in each direction until I hit a piece or the end of the board
             return [mv for d in directions for mv in direxp(d)]
 
@@ -654,10 +681,10 @@ R N B Q K B N R
             else:
                 return(-1, -1)
 
-        def execute_edge_effects(square, moves_list): # moves_list = list of moves: this method parses through the list and replaces tuples 
+        def execute_edge_effects(square: Square, moves_list: list[Square]) -> list[Move]: # moves_list = list of moves: this method parses through the list and replaces tuples 
             # of destination squares off the edge of the board with onboard squares, accounting for edge effects. 
             # square = starting square of jump
-            for i in range(0, len(moves_list)):
+            for i in range(0, int=len(moves_list)):
                 if not edge_effects(square, moves_list[i]) == (-1, -1):
                     moves_list[i] = edge_effects(square, moves_list[i])
             return moves_list
