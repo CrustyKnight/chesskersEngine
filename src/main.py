@@ -133,7 +133,7 @@ class Main:
             self.display.draw_board(self.screen)
             pygame.display.update()
 
-    def pve(self, surface) -> None:
+    def pve(self) -> None:
         _ = pygame.init()
         while True:
             self.display.draw_board(surface)
@@ -149,6 +149,5 @@ def script() -> str:
 
 # script()
 
-main = Main(
-)
+main = Main()
 main.main_loop()
