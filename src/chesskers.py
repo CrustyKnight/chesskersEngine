@@ -517,6 +517,7 @@ R N B Q K B N R
         p = self.piece_at(square)
         return []
 
+
     # Actual move generation done here for steps
     def square_steps(self, square: Square) -> list[Step]:
 
@@ -645,12 +646,12 @@ R N B Q K B N R
                 jd = jump_direction(final[0]) # Using jump direction to get vertical direction (vd) and horizontal direction (hd) below
                 vd = jd[0]
                 hd = jd[1]
-                # Second thing: enabling all pieces to take over the horizontal edges, or on the sides of the board. 
+                # Second thing: enabling all pieces to take over the left and right edges, or on the sides of the board. 
                 if hd == -1 and final[0][1] == 0:
                     final[1][1] = 7
                 elif hd == 1 and final[0][1] == 7:
                     final[1][1] = 0
-                # Third thing: enabling pieces to take over their opponent's vertical edges, on the edges where their pawns can promote
+                # Third thing: enabling pieces to take over their opponent's bottom (their top) edges, on the edges where their pawns can promote
                 if vd == -1 and piece > 0 and final[0][0] == 0:
                     final[0][1] = 7
                 elif vd == 1 and piece < 0 and final[0][0] == 7:

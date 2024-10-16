@@ -215,5 +215,7 @@ class Display:  # The main class behind this file.
         self.show_pieces(surface)
 
     def draw_board(self, surface) -> None:
+        empty = (255, 255, 255) #The last 0 indicates 0 alpha, a transparent color
+        surface.fill(empty)
         self.draw_squares(surface)
         self.show_pieces(surface)

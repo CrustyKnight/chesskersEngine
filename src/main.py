@@ -93,6 +93,8 @@ class Main:
         # Second character of UCN = number (in string form) for first row of piece
         # Second to last character of UCN = letter for final column of piece as shown by col_dict above
         # Last character of UCN = number (in string form) for final row of piece
+        if not is_ucn(boardUCN):
+            return
         start_row = HEIGHT // SQ_SIZE - int(boardUCN[1])
         start_col = int(col_dict[boardUCN[0]])
         final_row = HEIGHT // SQ_SIZE - int(boardUCN[len(boardUCN) - 1])
@@ -141,6 +143,12 @@ class Main:
             print(self.board)
             self.display.update_board(surface)
 
+def script() -> str:
+        text = input("Please enter a number between 1 and 10")
+        return text
 
-main = Main()
+# script()
+
+main = Main(
+)
 main.main_loop()
