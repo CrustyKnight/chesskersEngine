@@ -1,6 +1,6 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
 # Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
-from typing import Literal, TypeAlias, override
+from typing import Literal, TypeAlias
 
 Square: TypeAlias = tuple[int, int]
 Board: TypeAlias = list[list[int]]
