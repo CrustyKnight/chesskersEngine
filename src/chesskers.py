@@ -7,14 +7,14 @@ from typing import Literal, TypeAlias, override
 
 
 Direction: TypeAlias = tuple[int, int]
-Square: TypeAlias = tuple[int, int]
+Square: TypeAlias = tuple[int, int]  # Row, Col
 Piece: TypeAlias = Literal[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6]
 Step: TypeAlias = tuple[Square, Square]
 Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 QueenContext: TypeAlias = None | Literal["diag", "straight"]
-Squares: TypeAlias = list[list[Piece]] 
+Squares: TypeAlias = list[list[Piece]]
 
 # yay
 # YAY
@@ -83,7 +83,7 @@ R N B Q K B N R
         # R N B Q K B N R
         #         """)
         # self.moves = self.calc_moves()
-        
+
         self.color = 1 if self.turns % 2 == 0 else -1
         self.turns = 0
 
@@ -264,8 +264,15 @@ R N B Q K B N R
             )
 
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
-        possible_functions = [0, check_pawn_step(), check_knight_step(), check_bishop_step(), 
-                              check_rook_step(), check_queen_step(), check_king_step()]
+        possible_functions = [
+            0,
+            check_pawn_step(),
+            check_knight_step(),
+            check_bishop_step(),
+            check_rook_step(),
+            check_queen_step(),
+            check_king_step(),
+        ]
         return possible_functions[abs(piece)]
 
     def check_valid_jump(  # This function is used to VALIDATE jumps, ie piece-taking moves/captures
@@ -447,8 +454,15 @@ R N B Q K B N R
                 )
 
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
-        possible_functions = [0, check_pawn_jump(), check_knight_jump(), check_bishop_jump(), 
-                              check_rook_jump(), check_queen_jump(), check_king_jump()]
+        possible_functions = [
+            0,
+            check_pawn_jump(),
+            check_knight_jump(),
+            check_bishop_jump(),
+            check_rook_jump(),
+            check_queen_jump(),
+            check_king_jump(),
+        ]
         return possible_functions[abs(piece)]
 
     def is_step(self, move: Move) -> bool:
@@ -468,33 +482,31 @@ R N B Q K B N R
         # for e4e5 and cases like that
         def parse_step(move: str) -> Step:
             start = move[:2]
-            end = move[2:] 
+            end = move[2:]
 
             s1 = square_map[start[0]]
             s2 = 8 - int(start[1])
 
             e1 = square_map[end[0]]
             e2 = 8 - int(end[1])
-            return ((s2,s1), (e2,e1))
+            return ((s2, s1), (e2, e1))
 
         def parse_jump(move: str) -> Jump:
             m = move.split("t")
 
             start = m[0][:2]
             s1 = square_map[start[0]]
-            s2 = 7-int(start[1]) 
+            s2 = 7 - int(start[1])
             end = m[0][2:]
             e1 = square_map[end[0]]
-            e2 = 7-int(end[1])
+            e2 = 7 - int(end[1])
             hop = m[1]
             h1 = square_map[hop[0]]
-            h2 = 7-int(hop[1])
+            h2 = 7 - int(hop[1])
 
             # simplifying is for losers
 
-            return ((s2,s1),(e2,e1),(h2,h1))
-
-
+            return ((s2, s1), (e2, e1), (h2, h1))
 
         # move notation: e2e6te7
         #                e2e6
@@ -508,36 +520,43 @@ R N B Q K B N R
 
         for m in subs:
             M.append(parse_jump(m))
-                    
+
         return M
 
-    
-
-    def calc_moves(self, opts: str="N") -> list[Move]:
+    def calc_moves(self, opts: str = "N") -> list[Move]:
         def sign(n: int) -> int:
             return 1 if n > 0 else -1 if n < 0 else 0
 
         moves: list[Move] = []
 
         if opts == "N":
-            for i in range(0,8):
+            for i in range(0, 8):
                 for j in range(0, 8):
-                    if self.piece_at(square=(i,j)) != 0 and sign(n=self.piece_at(square=(i,j))) == self.color:
-                        moves.append(self.square_moves(square=(i,j)))
+                    if (
+                        self.piece_at(square=(i, j)) != 0
+                        and sign(n=self.piece_at(square=(i, j))) == self.color
+                    ):
+                        moves.append(self.square_moves(square=(i, j)))
         elif opts == "white":
-            for i in range(0,8):
-                for j in range(0,8):
-                    if self.piece_at(square=(i,j)) != 0 and sign(n=self.piece_at(square=(i,j))) == 1:
-                        moves.append(self.square_moves(square=(i,j)))
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    if (
+                        self.piece_at(square=(i, j)) != 0
+                        and sign(n=self.piece_at(square=(i, j))) == 1
+                    ):
+                        moves.append(self.square_moves(square=(i, j)))
         # typos beware
         else:
-            for i in range(0,8):
-                for j in range(0,8):
-                    if self.piece_at(square=(i,j)) != 0 and sign(self.piece_at(square=(i,j))) == -1:
-                        moves.append(self.square_moves(square=(i,j)))
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    if (
+                        self.piece_at(square=(i, j)) != 0
+                        and sign(self.piece_at(square=(i, j))) == -1
+                    ):
+                        moves.append(self.square_moves(square=(i, j)))
 
         return moves
-                    
+
     def square_moves(self, square: Square) -> list[Move]:
         # TODO
         p = self.piece_at(square)
@@ -790,7 +809,7 @@ R N B Q K B N R
             else:
                 return rook()
 
-        def king():
+        def king() -> list[tuple[Square, Square]]:
             moves = [
                 (-1, 1),
                 (0, 1),
@@ -820,10 +839,14 @@ R N B Q K B N R
     def square_jumps_recursive(
         self, square: Square, qctx: QueenContext = None
     ) -> list[JumpMove] | None:
+
+        # remember to end the recursive search if you ever jump over the edge
+        # do this in next_level by returning none if the current jump land is not 1 away from taken
+
         def new_qctx(jump: Jump) -> QueenContext:
             # Basically, see if the queen jumped, and if so, which way
             # Straight or Diagonal???
-            # if not isQueenJump ==> 
+            # if not isQueenJump ==>
             pass
 
         def jump_end(jump: Jump) -> Square:
@@ -875,7 +898,7 @@ R N B Q K B N R
         self.put_at(0, take)
         self.put_at(p, land)
 
-    def do_step(self, step: Step) -> None: 
+    def do_step(self, step: Step) -> None:
         (start, end) = step
         p: Piece = self.piece_at(square=start)
         self.put_at(p=0, sq=start)
