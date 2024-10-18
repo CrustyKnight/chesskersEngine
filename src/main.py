@@ -16,10 +16,10 @@ class Main:
     def __init__(self) -> None:
         self.screen = pygame.display.set_mode((800, 800))
         self.display = Display(self.screen)
-        self.board = self.display.board
-        print(self.board.squares)
         self.display.draw_board(self.screen)
         self.board = Board()
+        self.display.board = self.board
+        print(self.board.squares)
         self.turns_played = 0
 
     # TODO: Refactor displaying pieces as large temporarily.
@@ -133,17 +133,15 @@ class Main:
 
     def pve(self) -> None:
         _ = pygame.init()
+        self.display.draw_board(self.screen)
+        pygame.display.update()
         while True:
             move = self.board.from_UCN(input("")) 
-            if move in board.moves: 
-                self.board.do_move(move)
-                print(self.board)
+            self.board.do_move(move)
+            print(self.board)
+            self.display.draw_board(self.screen)
+            pygame.display.update()
 
 
 main = Main()
-_ = main.pve()
-
-
-main = Main()
-main.main_loop()
->>>>>>> 5bc2130884b5249e26d4bfa8dbe21305b738b541
+main.pve()

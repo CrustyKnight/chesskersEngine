@@ -68,8 +68,6 @@ R N B Q K B N R
             self.squares = self.from_fen_string(board)
         elif board:
             self.from_string(board)
-
-        self.legal_moves = self.calc_moves()
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -82,10 +80,10 @@ R N B Q K B N R
         # P P P P P P P P
         # R N B Q K B N R
         #         """)
-        # self.moves = self.calc_moves()
         
-        self.color = 1 if self.turns % 2 == 0 else -1
         self.turns = 0
+        self.color = 1 if self.turns % 2 == 0 else -1
+        self.moves = self.calc_moves()
 
     def from_fen_string(self, string: str) -> Square:
         return [[0]]
@@ -482,13 +480,13 @@ R N B Q K B N R
 
             start = m[0][:2]
             s1 = square_map[start[0]]
-            s2 = 7-int(start[1]) 
+            s2 = 8-int(start[1]) 
             end = m[0][2:]
             e1 = square_map[end[0]]
-            e2 = 7-int(end[1])
+            e2 = 8-int(end[1])
             hop = m[1]
             h1 = square_map[hop[0]]
-            h2 = 7-int(hop[1])
+            h2 = 8-int(hop[1])
 
             # simplifying is for losers
 
@@ -889,6 +887,13 @@ R N B Q K B N R
         else:
             for m in move:
                 self.do_jump(m)
+
+    # how we add a move to the board
+    def push(self, move: Move) -> None:
+        if move in self.moves: 
+            self.do_move(move)
+            self.turns+=1
+            self.moves = self.calc_moves()
 
     def put_at(self, p: Piece, sq: Square):
         r, c = sq
