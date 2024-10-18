@@ -526,10 +526,20 @@ R N B Q K B N R
     def calc_moves(self):
         pass
 
-    def possible_calc_moves(self, color=None):
+    def possible_calc_moves(self, color: Literal[-1, 1] | None = None):
         sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
-        moves = [mv for sq in sqs for mv in self.square_moves(sq)]
-        return moves
+        sqs_white = [sq for sq in sqs if self.piece_at(sq) > 0]
+        sqs_black = [sq for sq in sqs if self.piece_at(sq) < 0]
+        white_moves = [mv for sq in sqs_white for mv in self.square_moves(sq)]
+        black_moves = [mv for sq in sqs_black for mv in self.square_moves(sq)]
+        moves = [
+            [],
+            white_moves,
+            black_moves,
+        ]  # [Empty_moves, white_moves, black_moves]
+        if color:
+            return moves[color]
+        return moves[self.color]
 
     def square_moves(self, square: Square) -> list[Move]:
         # Should work.
