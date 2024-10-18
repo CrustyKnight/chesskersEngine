@@ -3,7 +3,7 @@ from bot import find_best_move
 from bot import val_map
 
 
-from typing import Literal, TypeAlias, override
+from typing import Literal, TypeAlias
 
 
 Direction: TypeAlias = tuple[int, int]
@@ -69,7 +69,6 @@ R N B Q K B N R
         elif board:
             self.from_string(board)
 
-        self.legal_moves = self.calc_moves()
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -84,10 +83,11 @@ R N B Q K B N R
         #         """)
         # self.moves = self.calc_moves()
 
-        self.color = 1 if self.turns % 2 == 0 else -1
         self.turns = 0
+        self.color = 1 if self.turns % 2 == 0 else -1
+        self.legal_moves = self.calc_moves()
 
-    def from_fen_string(self, string: str) -> Square:
+    def from_fen_string(self, string: str) -> list[list[Piece]]:
         return [[0]]
 
     def from_string(self, string: str):
@@ -124,7 +124,6 @@ R N B Q K B N R
             self.squares[y][x] = d[token]
             counter += 1
 
-    @override
     def __str__(self):
         # TODO make sure this prints out the same format from_str takes in (right now it does not include the extra data line)
         d = {
@@ -143,7 +142,7 @@ R N B Q K B N R
             -1: "p",
         }
 
-        ret = ""
+        ret = "data_line\n"
 
         for row in self.squares:
             for piece in row:
@@ -875,9 +874,9 @@ R N B Q K B N R
         output: list[JumpMove] = []
         for jump in jumps:
             next_jumps: list[JumpMove] | None = next_level(jump)
-            if next_jumps == None:
-                output.append([jump])  # [jump] is a valid JumpMove
-            else:
+            # if next_jumps == None:
+            output.append([jump])  # [jump] is a valid JumpMove
+            if next_jumps != None:
                 for next_jump in next_jumps:
                     output.append([jump] + next_jump)
         # This feels mostly complete/roughed out, but the base case feels wrong.
