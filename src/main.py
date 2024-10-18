@@ -16,10 +16,10 @@ class Main:
     def __init__(self) -> None:
         self.screen = pygame.display.set_mode((800, 800))
         self.display = Display(self.screen)
-        self.board = self.display.board
-        print(self.board.squares)
         self.display.draw_board(self.screen)
         self.board = Board()
+        self.display.board = self.board
+        print(self.board.squares)
         self.turns_played = 0
 
     # TODO: Refactor displaying pieces as large temporarily.
@@ -93,6 +93,8 @@ class Main:
         # Second character of UCN = number (in string form) for first row of piece
         # Second to last character of UCN = letter for final column of piece as shown by col_dict above
         # Last character of UCN = number (in string form) for final row of piece
+        if not is_ucn(boardUCN):
+            return
         start_row = HEIGHT // SQ_SIZE - int(boardUCN[1])
         start_col = int(col_dict[boardUCN[0]])
         final_row = HEIGHT // SQ_SIZE - int(boardUCN[len(boardUCN) - 1])
@@ -133,17 +135,21 @@ class Main:
 
     def pve(self) -> None:
         _ = pygame.init()
+        self.display.draw_board(self.screen)
+        pygame.display.update()
         while True:
-            move = self.board.from_UCN(input("")) 
-            if move in board.moves: 
-                self.board.do_move(move)
-                print(self.board)
+            self.display.draw_board(surface)
+            move = self.board.from_UCN(input(""))
+            print(move)
+            self.board.do_move(move)
+            print(self.board)
+            self.display.update_board(surface)
 
+def script() -> str:
+        text = input("Please enter a number between 1 and 10")
+        return text
+
+# script()
 
 main = Main()
-_ = main.pve()
-
-
-main = Main()
-main.main_loop()
->>>>>>> 5bc2130884b5249e26d4bfa8dbe21305b738b541
+main.pve()
