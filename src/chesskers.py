@@ -711,32 +711,20 @@ R N B Q K B N R
             #         moves_list[i] = edge_effects(square, moves_list[i])
             # return moves_list
 
-        def pawn():
+        def pawn() -> list[tuple[Square, Square]]:
 
             c = -1 if p < 0 else 1
             d = -c
             possible_pieces = [add_sq_dir(square, (d, 1)), add_sq_dir(square, (d, -1))]
-            # factoring in edge effects: performing the algorithm if it is actually on an edge (checking if it = (-1, -1), which
-            # is the result of a piece not actually taking a piece on a board edge)
-            for i in range(0, len(possible_pieces)):
-                if not edge_effects(square, possible_pieces[i]) == (-1, -1):
-                    possible_pieces[i] = edge_effects(square, possible_pieces[i])
             possible_pieces = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
-            possible_pieces = [
-                (mv, add_dir(mv))
-                for mv in possible_pieces
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
+            possible_pieces = [(mv, add_dir(mv)) for mv in possible_pieces]
+            possible_pieces = execute_edge_effects(possible_pieces)
 
-            # TODO right now this won't allow taking around the edges. fix that
-            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            # Debangshu is on it! this is his solution!!!
-            possible_pieces = execute_edge_effects(square, possible_pieces)
             return possible_pieces
 
-        def knight():
+        def knight() -> list[tuple[Square, Square]]:
             def split_dir(direction: Direction) -> list[Direction]:
                 return [(direction[0], 0), (0, direction[1])]
 
@@ -757,47 +745,35 @@ R N B Q K B N R
                 d = split_dir(jump_direction(mv))
                 new_moves.append((mv, add_sq_dir(mv, d[0])))
                 new_moves.append((mv, add_sq_dir(mv, d[1])))
-            new_moves = [
-                mv for mv in new_moves if in_bounds(mv[1]) and self.empty(mv[1])
-            ]
+            new_moves = execute_edge_effects(new_moves)
+            # new_moves = [
+            #     mv for mv in new_moves if in_bounds(mv[1]) and self.empty(mv[1])
+            # ]
             # taking over the edges again
-            new_moves = execute_edge_effects(square, new_moves)
             return new_moves
 
-        def bishop():
+        def bishop() -> list[tuple[Square, Square]]:
             directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
             possible_pieces = [direxp(d) for d in directions]
             moves = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
-            moves = [
-                (mv, add_dir(mv))
-                for mv in moves
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
-            # TODO right now this won't allow taking around the edges. fix that
-            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            # Yes he has!!!
-            moves = execute_edge_effects(square, moves)
+            moves = [(mv, add_dir(mv)) for mv in moves]  # gen all the moves
+            moves = execute_edge_effects(moves)
+            # filter/ensure all in bounds/wrap around/landing on empty
             return moves
 
-        def rook():
+        def rook() -> list[tuple[Square, Square]]:
             directions = [(0, 1), (0, -1), (-1, 0), (1, 0)]
             possible_pieces = [direxp(d) for d in directions]
             moves = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
-            moves = [
-                (mv, add_dir(mv))
-                for mv in moves
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
-            # TODO right now this won't allow taking around the edges. fix that
-            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            moves = execute_edge_effects(square, moves)
+            moves = [(mv, add_dir(mv)) for mv in moves]
+            moves = execute_edge_effects(moves)
             return moves
 
-        def queen():
+        def queen() -> list[tuple[Square, Square]]:
             if qctx == None:
                 return bishop() + rook()
             elif qctx == "diag":
@@ -805,7 +781,7 @@ R N B Q K B N R
             else:
                 return rook()
 
-        def king():
+        def king() -> list[tuple[Square, Square]]:
             moves = [
                 (-1, 1),
                 (0, 1),
@@ -818,12 +794,8 @@ R N B Q K B N R
             ]
             moves = [add_sq_dir(square, m) for m in moves]
             moves = [m for m in moves if in_bounds(m) and not self.empty(m)]
-            moves = [
-                (mv, add_dir(mv))
-                for mv in moves
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
-            moves = execute_edge_effects(square, moves)
+            moves = [(mv, add_dir(mv)) for mv in moves]
+            moves = execute_edge_effects(moves)
             return moves
 
         def empty() -> list[tuple[Square, Square]]:
