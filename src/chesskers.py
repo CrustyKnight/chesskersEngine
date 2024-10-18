@@ -526,10 +526,15 @@ R N B Q K B N R
     def calc_moves(self):
         pass
 
+    def possible_calc_moves(self, color=None):
+        sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
+        moves = [mv for sq in sqs for mv in self.square_moves(sq)]
+        return moves
+
     def square_moves(self, square: Square) -> list[Move]:
-        # TODO
-        p = self.piece_at(square)
-        return []
+        # Should work.
+        # (Edited square_jumps_recursive so it returns an empty list instead of None if there are no possible jumps)
+        return self.square_steps(square) + self.square_jumps_recursive(square)
 
     # Actual move generation done here for steps
     def square_steps(self, square: Square) -> list[Step]:
@@ -833,14 +838,39 @@ R N B Q K B N R
 
     def square_jumps_recursive(
         self, square: Square, qctx: QueenContext = None
-    ) -> list[JumpMove] | None:
+    ) -> list[JumpMove]:
         def new_qctx(jump: Jump) -> QueenContext:
             # Basically, see if the queen jumped, and if so, which way
             # Straight or Diagonal???
             # if not isQueenJump ==>
-            pass
+            def diagonalp(jump: Jump) -> bool:
+                d = jump_direction(jump)
+                return d in [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 
-        def jump_end(jump: Jump) -> Square:
+            if self.piece_at(jump_start(jump)) == 5:
+                if diagonalp(jump):
+                    return "diag"
+                else:
+                    return "straight"
+            return None
+
+        def jump_direction(jump: Jump) -> Direction:
+            # taken is the square of the taken piece
+            taken = jump_take(jump)
+            end = jump_land(jump)
+
+            def sign(num: int):
+                return -1 if num < 0 else 0 if num == 0 else 1
+
+            return (sign(end[0] - taken[0]), sign(end[1] - taken[1]))
+
+        def jump_start(jump: Jump) -> Square:
+            return jump[0]
+
+        def jump_take(jump: Jump) -> Square:
+            return jump[1]
+
+        def jump_land(jump: Jump) -> Square:
             return jump[2]
 
         jumps: list[Jump] = self.square_jumps(square, qctx)
@@ -850,25 +880,25 @@ R N B Q K B N R
         # What I want this to return is a list of moves I can prepend a jump to
 
         if len(jumps) == 0:
-            return None
+            return []
 
         # TODO implement Board.copy() and Board.do_jump(Jump)
 
-        def next_level(jump: Jump) -> list[JumpMove] | None:
+        def next_level(jump: Jump) -> list[JumpMove]:
             nb = self.copy()  # Copy board
             nb.do_jump(jump)  # Execute move
             ctx = new_qctx(jump)
             # Get the new ctx (see if queen jumped diag or straight basically)
-            return nb.square_jumps_recursive(jump_end(jump), ctx)
+            return nb.square_jumps_recursive(jump_land(jump), ctx)
             # Check for more jumps this piece can do (so look at where it landed)
             #
 
         output: list[JumpMove] = []
         for jump in jumps:
-            next_jumps: list[JumpMove] | None = next_level(jump)
+            next_jumps: list[JumpMove] = next_level(jump)
             # if next_jumps == None:
             output.append([jump])  # [jump] is a valid JumpMove
-            if next_jumps != None:
+            if len(next_jumps) != 0:
                 for next_jump in next_jumps:
                     output.append([jump] + next_jump)
         # This feels mostly complete/roughed out, but the base case feels wrong.
