@@ -514,14 +514,34 @@ R N B Q K B N R
                     
         return M
 
-    def calc_moves(self):
-        pass
 
     def square_moves(self, square: Square) -> list[Move]:
         # TODO
         p = self.piece_at(square)
         return []
 
+    def calc_moves(self, opts:str = "N") -> list[Move]:
+            def sign(n: int) -> int:
+                return 1 if n > 0 else -1 if n < 0 else 0
+
+            moves: list[Move] = []
+
+            if opts == "N":
+                for i in range(0,8):
+                    for j in range(0, 8):
+                        if self.piece_at(square=(i,j)) != 0 and sign(n=self.piece_at(square=(i,j))) == self.color:
+                            moves.append(self.square_moves(square=(i,j)))
+            elif opts == "white":
+                for i in range(0,8):
+                    for j in range(0,8):
+                        if self.piece_at(square=(i,j)) != 0 and sign(n=self.piece_at(square=(i,j))) == 1:
+                            moves.append(self.square_moves(square=(i,j)))
+        # typos beware
+            else:
+                for i in range(0,8):
+                    for j in range(0,8):
+                        if self.piece_at(square=(i,j)) != 0 and sign(self.piece_at(square=(i,j))) == -1:
+                            moves.append(self.square_moves(square=(i,j)))
 
     # Actual move generation done here for steps
     def square_steps(self, square: Square) -> list[Step]:
