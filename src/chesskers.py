@@ -524,7 +524,7 @@ R N B Q K B N R
         return M
 
 
-    def possible_calc_moves(self, color: Literal[-1, 1] | None = None):
+    def calc_moves(self, color: Literal[-1, 1] | None = None):
         sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
         sqs_white = [sq for sq in sqs if self.piece_at(sq) > 0]
         sqs_black = [sq for sq in sqs if self.piece_at(sq) < 0]
