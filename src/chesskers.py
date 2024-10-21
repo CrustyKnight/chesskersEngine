@@ -62,6 +62,7 @@ p p p p p p p p
 P P P P P P P P
 R N B Q K B N R
 """,
+        copy: bool = False
     ):
         self.squares: list[list[Piece]]
         self.squares = [[0 for _ in range(8)] for _ in range(8)]
@@ -81,11 +82,10 @@ R N B Q K B N R
         # P P P P P P P P
         # R N B Q K B N R
         #         """)
-        # self.moves = self.calc_moves()
-
         self.turns = 0
         self.color = 1 if self.turns % 2 == 0 else -1
-        self.legal_moves = self.calc_moves()
+        if not copy:
+            self.moves = self.calc_moves(self.color)
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
@@ -183,7 +183,7 @@ R N B Q K B N R
     # boolean that returns whether or not a given move is legal
     # no need for stuff like pseudo-legality because there isn't check in this game
     def legal_move(self, move: Move) -> bool:
-        return True if move in self.legal_moves else False
+        return True if move in self.moves else False
 
     # In chesskers, we define moves as having 2 types: steps and jumps
     # A step is when a piece moves to an empty square, in which case it moves like a normal chess piece
@@ -524,20 +524,38 @@ R N B Q K B N R
         return M
 
 
-    def calc_moves(self, color: Literal[-1, 1] | None = None):
-        sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
-        sqs_white = [sq for sq in sqs if self.piece_at(sq) > 0]
-        sqs_black = [sq for sq in sqs if self.piece_at(sq) < 0]
-        white_moves = [mv for sq in sqs_white for mv in self.square_moves(sq)]
-        black_moves = [mv for sq in sqs_black for mv in self.square_moves(sq)]
-        moves = [
-            [],
-            white_moves,
-            black_moves,
-        ]  # [Empty_moves, white_moves, black_moves]
-        if color:
-            return moves[color]
-        return moves[self.color]
+    #def calc_moves(self, color: Literal[-1, 1] | None = None):
+    #    sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
+    #    sqs_white = [sq for sq in sqs if self.piece_at(sq) > 0]
+    #    sqs_black = [sq for sq in sqs if self.piece_at(sq) < 0]
+    #    white_moves = [mv for sq in sqs_white for mv in self.square_moves(sq)]
+    #    black_moves = [mv for sq in sqs_black for mv in self.square_moves(sq)]
+    #    moves = [
+    #        [],
+    #        white_moves,
+    #        black_moves,
+    #    ]  # [Empty_moves, white_moves, black_moves]
+    #    if color:
+    #
+    #    return moves[self.color]
+    #
+    def calc_moves(self, color: Literal[-1, 1, 0]) -> list[Move]:
+        sqs: list[Square] = [(i, j) for i in range(0,8) for j in range(0,8)] 
+        
+        sqsw: list[Square] = [s for s in sqs if self.piece_at(s) > 0] 
+        sqsb: list[Square] = [s for s in sqs if self.piece_at(s) < 0]
+
+        whitemoves: list[Move] = [mv for s in sqsw for mv in self.square_moves(s)] 
+        blackmoves: list[Move] = [mv for s in sqsb for mv in self.square_moves(s)] 
+
+# more aesthetically pleasing this way imo
+        if color == -1:
+            return blackmoves
+        elif color == 1:
+            return whitemoves 
+        elif color == 0:
+            return whitemoves + blackmoves
+ 
 
     def square_moves(self, square: Square) -> list[Move]:
         # Should work.
@@ -572,7 +590,7 @@ R N B Q K B N R
             start_row = 6 if p == 1 else 1
             if square[0] == start_row:
                 moves.append(add_sq_dir(square, (d * 2, 0)))
-            return [mv for mv in moves if self.empty(mv) and in_bounds(mv)]
+            return [mv for mv in moves if in_bounds(mv) and self.empty(mv)]
 
         def knight():
             moves = [
@@ -586,12 +604,12 @@ R N B Q K B N R
                 (-2, -1),
             ]
             moves = [add_sq_dir(square, m) for m in moves]
-            moves = [m for m in moves if self.empty(m) and in_bounds(m)]
+            moves = [m for m in moves if in_bounds(m) and self.empty(m)]
             # moves = [m for m in moves if self.check_valid_step(square, m)]
             return moves
 
         def bishop():
-            directions: list[Direction][(-1, -1), (-1, 1), (1, -1), (1, 1)]
+            directions: list[Direction] = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
             # travel diagonally in each direction until I hit a piece or the end of the board
             return [mv for d in directions for mv in direxp(d)]
 
@@ -615,7 +633,7 @@ R N B Q K B N R
                 (0, 1),
             ]  # straight
             moves = [add_sq_dir(square, m) for m in moves]
-            moves = [m for m in moves if self.empty(m) and in_bounds(m)]
+            moves = [m for m in moves if in_bounds(m) and self.empty(m)]
             return moves
 
         def empty() -> list[Square]:
@@ -669,9 +687,9 @@ R N B Q K B N R
             #
             # edge effects both ensures that moves are made within bounds, and that jumps don't land ontop of pieces
             piece = self.piece_at(square)
-            taken_piece = self.piece_at(taken)
+            #taken_piece = self.piece_at(taken)
             # First thing: making sure that the piece exists, is taking a piece, and is moving to an empty destination square
-            assert piece != 0 and taken_piece != 0 and self.empty(land)
+            #assert piece != 0 and taken_piece != 0 and self.empty(land)
             # check. Is the landing square in bounds? (if so, just return what we got)
             if in_bounds(land):
                 if self.empty(land):
@@ -681,8 +699,9 @@ R N B Q K B N R
 
             # its not in bounds. time to rectify it
             land_row, land_col = land
-            rectifier = {-1: 7, 8: 0}
-            land_col = rectifier[land_col]
+            rectifier = {7: -1, 8: 0}
+            if 0 <= land_col >= 7 :
+                land_col = rectifier[land_col]
 
             if piece > 0:  # color is white
                 if land_row == 8:
@@ -889,7 +908,7 @@ R N B Q K B N R
         return 0 == self.piece_at(square)
 
     def copy(self):
-        return Board(False, self.__str__())
+        return Board(False, self.__str__(), copy=True)
 
     def do_jump(self, jump: Jump):
         # assume it is valid
@@ -918,7 +937,10 @@ R N B Q K B N R
         if move in self.moves:
             self.do_move(move)
             self.turns += 1
-            self.moves = self.calc_moves()
+            self.color *= -1
+            self.moves = self.calc_moves(self.color)
+        else:
+            print("illegal move")
 
     def put_at(self, p: Piece, sq: Square):
         r, c = sq

@@ -138,12 +138,14 @@ class Main:
         self.display.draw_board(self.screen)
         pygame.display.update()
         while True:
-            self.display.draw_board(surface)
+            self.display.draw_board(self.screen)
             move = self.board.from_UCN(input(""))
             print(move)
-            self.board.do_move(move)
-            print(self.board)
-            self.display.update_board(surface)
+            print("COLOR: white") if self.display.board.color == 1 else print("COLOR: black")
+            self.display.board.push(move)
+            print(self.display.board)
+            self.display.draw_board(self.screen)
+            pygame.display.update()
 
 def script() -> str:
         text = input("Please enter a number between 1 and 10")
