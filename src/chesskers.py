@@ -257,7 +257,7 @@ R N B Q K B N R
 
         def check_king_step():  # Checks that the king is moving 1 square in ANY diretion. Not moving has already been checked before
             # starting the step functions of individual pieces.
-            return (-1 <= final_col - start_col <= 1) or (
+            return (-1 <= final_col - start_col <= 1) and (
                 -1 <= final_row - start_row <= 1
             )
 
@@ -267,10 +267,11 @@ R N B Q K B N R
         return possible_functions[abs(piece)]
 
     def check_valid_jump(  # This function is used to VALIDATE jumps, ie piece-taking moves/captures
-        self, start: Square, end: Square, isFirstJumpOverall: bool = True
+        self, start: Square, end: Square, taken: Square, isFirstJumpOverall: bool = True
     ):  # start and end are tuples of 2 elements: (row, col):
         start_row, start_col = start
         final_row, final_col = end
+        taken_row, taken_col = taken
         piece = self.piece_at(
             start
         )  # this piece will be checked in value to determine what it is (knight, pawn, etc) and ensure it is moving correctly.bindsym $mod+Shift+z
@@ -292,52 +293,39 @@ R N B Q K B N R
         if final_row - start_row == 0 and final_col - start_col == 0:
             return False
 
-        # Returning false if end square is not empty:
-        if self.piece_at(end) != 0:
-            return False
-
-        # checking out of bounds: now pieces can take over the edge and teleport to the other side of the board...
-        def isFinalJump():  # We might need this function to further account for edge effects, especially if they
-            # have only been accounted for in imagination. Maybe we won't need it in this function.
-            # but we will certainly NEED THIS FUNCTION IN MOVE GENERATION
-            # TODO: Implement this function into move generation...
-            if final_col == 8:
-                final_col == 0
-                return True
-            elif final_col == -1:
-                final_col == 7
-                return True
-            if piece > 0:
-                if final_row == -1:
-                    final_row = 7
-                    return True
-            elif piece < 0:
-                if final_row == 8:
-                    final_row = 0
-                    return True
+        # Returning false if end square is not empty or if take square is empty:
+        if self.piece_at(end) != 0 or self.piece_at(taken) == 0:
             return False
 
         # Jump functions of individual pieces
         def check_pawn_jump():
-            if abs(vertical_distance) == abs(horizontal_distance) == 2:
+            if abs(vertical_distance) == abs(horizontal_distance) == 2: # Checking for on-board jumps
+                # Checking that row and col of piece being taken is between the start and final squares
+                if not ((start_row < taken_row < final_row or final_row < taken_row < start_row)
+                        or (start_col < taken_col < final_col or final_col < taken_col < start_col)):
+                    return False
                 if piece == 1:  # White pawn jump
                     if (
                         vertical_distance > 0
                     ):  # White pawns travel UP the board, NOT DOWN the board.
                         return False
-                else:
+                else: # Black pawn jump
                     if (
                         vertical_distance < 0
                     ):  # Black pawns travel DOWN the board, NOT UP the board.
                         return False
-                taken_piece: Square = (
-                    start_row + vertical_distance - vd,
-                    start_col + horizontal_distance - hd,
-                )  # Determining square where piece is taken.
                 return (
-                    self.piece_at(taken_piece) != 0
+                    True
                 )  # Returning True if a piece is being taken, otherwise return False.
-            return False
+            else: # Checking for jumps over the vertical and horizontal edges
+                # checking columns: all pieces can take over the left and right edges of the board
+                if abs(start_col - taken_col) == 1:
+                    if taken_col == 0 or 7:
+                        correct_col_bool = final_col == 7 if taken_col == 0 else final_col == 0
+                if abs(start_row - taken_col) == 1:
+                    if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
+                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                return correct_row_bool or correct_col_bool
 
         def check_knight_jump():
             if (  # Checking for various possible 'L' shapes.
@@ -345,7 +333,7 @@ R N B Q K B N R
                 or (abs(horizontal_distance) == 3 and abs(vertical_distance == 1))
                 or (abs(vertical_distance) == 3 and abs(horizontal_distance == 1))
             ):
-                # Confirming that a piece is indeed taken (on a square in an otherwise step location) to do the 2 x 2 'L' jump
+                # Confirming that a piece is indeed taken (on a square in an otherwise step location) to do the 'L' jump
                 return (
                     self.piece_at(
                         (
@@ -362,7 +350,14 @@ R N B Q K B N R
                     )
                     != 0
                 )
-            return False
+            else: # Checking for edge effects of knights
+                if abs(start_row - taken_row) == 2:
+                    if taken_col == 0 or 7:
+                        correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                if abs(start_col - taken_col) == 2:
+                    if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
+                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                return correct_row_bool or correct_col_bool 
 
         def check_bishop_jump(isFirstJump=isFirstJumpOverall):
             if (
@@ -388,6 +383,13 @@ R N B Q K B N R
                         )
                         != 0
                     )
+            if vertical_distance != horizontal_distance: # edge effects
+                if abs(taken_col - start_col) == abs (taken_row - start_row):
+                    if taken_col == 0 or 7:
+                        correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                    if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
+                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                return correct_row_bool or correct_col_bool
             return False
 
         def check_rook_jump(isFirstJump=isFirstJumpOverall):
@@ -415,7 +417,12 @@ R N B Q K B N R
                         self.piece_at((start_row + vertical_distance - vd, start_col))
                         != 0
                     )
-            return False
+            if (vertical_distance != 0 and horizontal_distance == 0) or (horizontal_distance != 0 and vertical_distance == 0): # edge effects:
+                if taken_col == 0 or 7:
+                    correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
+                    correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+            return correct_row_bool or correct_col_bool
 
         def check_queen_jump(isFirstJump=isFirstJumpOverall):
             if (
@@ -443,7 +450,13 @@ R N B Q K B N R
                     )
                     != 0
                 )
-
+            elif not (abs(vertical_distance) == 2 or abs(horizontal_distance) == 2):
+                if (abs(start_col - taken_col) <= 1 or abs(start_row - taken_row) <= 1):
+                    if abs(start_row - start_col) == 1:
+                        correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                    if((taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0)):
+                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                return correct_col_bool or correct_row_bool
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
         possible_functions = [0, check_pawn_jump(), check_knight_jump(), check_bishop_jump(), 
                               check_rook_jump(), check_queen_jump(), check_king_jump()]
