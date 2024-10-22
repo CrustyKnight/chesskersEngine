@@ -55,12 +55,12 @@ def evaluate_move(move: Move, board: Board, depth:int):
     return [score, move]
 
 
-def alphabeta(board:Board, depth:int) -> int | float:
+def alphabeta(board, depth:int) -> int | float:
 
     def evalmove(move: Move, board:list[list[int]]) -> int | float:
         # change if needed
         tb = board.copy()
-        tb.move(move)
+        tb.push(move)
 
         return evaluate(tb)
 
@@ -126,7 +126,7 @@ def alphabeta(board:Board, depth:int) -> int | float:
 
 def find_best_move(board, depth):
     # change if needed
-    white = True if board.turn == board.white else False
+    white = True if board.color == 1 else False
 
     if white:
         return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])[1]

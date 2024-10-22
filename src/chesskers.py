@@ -62,6 +62,7 @@ p p p p p p p p
 P P P P P P P P
 R N B Q K B N R
 """,
+        copy: bool = False
     ):
         self.squares: list[list[Piece]]
         self.squares = [[0 for _ in range(8)] for _ in range(8)]
@@ -69,8 +70,6 @@ R N B Q K B N R
             self.squares = self.from_fen_string(board)
         elif board:
             self.from_string(board)
-
-        self.legal_moves = self.calc_moves()
         #         self.squares = [[]]
         #         self.from_string("""\
         # put other data here
@@ -83,13 +82,16 @@ R N B Q K B N R
         # P P P P P P P P
         # R N B Q K B N R
         #         """)
-        # self.moves = self.calc_moves()
+        self.turns = 0
+        self.color = 1 if self.turns % 2 == 0 else -1
+        if not copy:
+            self.moves = self.calc_moves(self.color)
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
         # return [[0]]
 
-    def from_string(self, string: str):
+    def from_string(self, string: str) -> None:
         # Also want information pertaining to en passant squares, turn number, etc
         counter = 0
         d: dict[str, Piece] = {
@@ -141,7 +143,7 @@ R N B Q K B N R
             -1: "p",
         }
 
-        ret = ""
+        ret = "data_line\n"
 
         for row in self.squares:
             for piece in row:
@@ -181,7 +183,7 @@ R N B Q K B N R
     # boolean that returns whether or not a given move is legal
     # no need for stuff like pseudo-legality because there isn't check in this game
     def legal_move(self, move: Move) -> bool:
-        return True if move in self.legal_moves else False
+        return True if move in self.moves else False
 
     # In chesskers, we define moves as having 2 types: steps and jumps
     # A step is when a piece moves to an empty square, in which case it moves like a normal chess piece
@@ -262,8 +264,15 @@ R N B Q K B N R
             )
 
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
-        possible_functions = [0, check_pawn_step(), check_knight_step(), check_bishop_step(), 
-                              check_rook_step(), check_queen_step(), check_king_step()]
+        possible_functions = [
+            0,
+            check_pawn_step(),
+            check_knight_step(),
+            check_bishop_step(),
+            check_rook_step(),
+            check_queen_step(),
+            check_king_step(),
+        ]
         return possible_functions[abs(piece)]
 
     def check_valid_jump(  # This function is used to VALIDATE jumps, ie piece-taking moves/captures
@@ -458,8 +467,15 @@ R N B Q K B N R
                         correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
                 return correct_col_bool or correct_row_bool
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
-        possible_functions = [0, check_pawn_jump(), check_knight_jump(), check_bishop_jump(), 
-                              check_rook_jump(), check_queen_jump(), check_king_jump()]
+        possible_functions = [
+            0,
+            check_pawn_jump(),
+            check_knight_jump(),
+            check_bishop_jump(),
+            check_rook_jump(),
+            check_queen_jump(),
+            check_king_jump(),
+        ]
         return possible_functions[abs(piece)]
 
     def is_step(self, move: Move) -> bool:
@@ -479,33 +495,31 @@ R N B Q K B N R
         # for e4e5 and cases like that
         def parse_step(move: str) -> Step:
             start = move[:2]
-            end = move[2:] 
+            end = move[2:]
 
             s1 = square_map[start[0]]
             s2 = 8 - int(start[1])
 
             e1 = square_map[end[0]]
             e2 = 8 - int(end[1])
-            return ((s2,s1), (e2,e1))
+            return ((s2, s1), (e2, e1))
 
         def parse_jump(move: str) -> Jump:
             m = move.split("t")
 
             start = m[0][:2]
             s1 = square_map[start[0]]
-            s2 = 7-int(start[1]) 
+            s2 = 8 - int(start[1])
             end = m[0][2:]
             e1 = square_map[end[0]]
-            e2 = 7-int(end[1])
+            e2 = 8 - int(end[1])
             hop = m[1]
             h1 = square_map[hop[0]]
-            h2 = 7-int(hop[1])
+            h2 = 8 - int(hop[1])
 
             # simplifying is for losers
 
-            return ((s2,s1),(e2,e1),(h2,h1))
-
-
+            return ((s2, s1), (e2, e1), (h2, h1))
 
         # move notation: e2e6te7
         #                e2e6
@@ -519,17 +533,47 @@ R N B Q K B N R
 
         for m in subs:
             M.append(parse_jump(m))
-                    
+
         return M
 
-    def calc_moves(self):
-        pass
+
+    #def calc_moves(self, color: Literal[-1, 1] | None = None):
+    #    sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
+    #    sqs_white = [sq for sq in sqs if self.piece_at(sq) > 0]
+    #    sqs_black = [sq for sq in sqs if self.piece_at(sq) < 0]
+    #    white_moves = [mv for sq in sqs_white for mv in self.square_moves(sq)]
+    #    black_moves = [mv for sq in sqs_black for mv in self.square_moves(sq)]
+    #    moves = [
+    #        [],
+    #        white_moves,
+    #        black_moves,
+    #    ]  # [Empty_moves, white_moves, black_moves]
+    #    if color:
+    #
+    #    return moves[self.color]
+    #
+    def calc_moves(self, color: Literal[-1, 1, 0]) -> list[Move]:
+        sqs: list[Square] = [(i, j) for i in range(0,8) for j in range(0,8)] 
+        
+        sqsw: list[Square] = [s for s in sqs if self.piece_at(s) > 0] 
+        sqsb: list[Square] = [s for s in sqs if self.piece_at(s) < 0]
+
+        whitemoves: list[Move] = [mv for s in sqsw for mv in self.square_moves(s)] 
+        blackmoves: list[Move] = [mv for s in sqsb for mv in self.square_moves(s)] 
+
+# more aesthetically pleasing this way imo
+        if color == -1:
+            return blackmoves
+        elif color == 1:
+            return whitemoves 
+        elif color == 0:
+            return whitemoves + blackmoves
+ 
 
     def square_moves(self, square: Square) -> list[Move]:
-        # TODO
-        p = self.piece_at(square)
-        return []
-
+        # Should work.
+        # (Edited square_jumps_recursive so it returns an empty list instead of None if there are no possible jumps)
+        return self.square_steps(square) + self.square_jumps_recursive(square)
 
     # Actual move generation done here for steps
     def square_steps(self, square: Square) -> list[Step]:
@@ -559,7 +603,7 @@ R N B Q K B N R
             start_row = 6 if p == 1 else 1
             if square[0] == start_row:
                 moves.append(add_sq_dir(square, (d * 2, 0)))
-            return [mv for mv in moves if self.empty(mv) and in_bounds(mv)]
+            return [mv for mv in moves if in_bounds(mv) and self.empty(mv)]
 
         def knight():
             moves = [
@@ -573,12 +617,12 @@ R N B Q K B N R
                 (-2, -1),
             ]
             moves = [add_sq_dir(square, m) for m in moves]
-            moves = [m for m in moves if self.empty(m) and in_bounds(m)]
+            moves = [m for m in moves if in_bounds(m) and self.empty(m)]
             # moves = [m for m in moves if self.check_valid_step(square, m)]
             return moves
 
         def bishop():
-            directions: list[Direction] [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+            directions: list[Direction] = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
             # travel diagonally in each direction until I hit a piece or the end of the board
             return [mv for d in directions for mv in direxp(d)]
 
@@ -602,7 +646,7 @@ R N B Q K B N R
                 (0, 1),
             ]  # straight
             moves = [add_sq_dir(square, m) for m in moves]
-            moves = [m for m in moves if self.empty(m) and in_bounds(m)]
+            moves = [m for m in moves if in_bounds(m) and self.empty(m)]
             return moves
 
         def empty() -> list[Square]:
@@ -643,68 +687,84 @@ R N B Q K B N R
 
         def add_dir(mv: Square):
             return add_sq_dir(mv, jump_direction(mv))
-        
-        # This method is RESPONSIBLE FOR MANAGING EDGE EFFECTS, ie, when a piece takes off the edge off the board.  
-        def edge_effects(final: tuple[Square, Square]) -> tuple[Square, Square]: # taken is the square of the taken piece
-            # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col), as a reminder)
-            # *** This method executes edge effects for jumps if they're necessary and/or possible*** 
-            # *** This method returns the tuple of the taking then destination square IF the destination square is 'off' the edge
-                # first element in tuple = square on which piece is being taken; second element in tuple = final destination of square
-            # Reminder: square = starting square as a tuple of (row, col)
-            piece = self.piece_at(square) 
-            taken_piece = self.piece_at(final[0])
-            destination_is_empty = self.piece_at(final[1]) == 0
-            # First thing: making sure that the piece exists, is taking a piece, and is moving to an empty destination square
-            if(abs(piece) > 0 and abs(taken_piece) > 0 and destination_is_empty):
-                jd = jump_direction(final[0]) # Using jump direction to get vertical direction (vd) and horizontal direction (hd) below
-                vd = jd[0]
-                hd = jd[1]
-                # Second thing: enabling all pieces to take over the left and right edges, or on the sides of the board. 
-                if hd == -1 and final[0][1] == 0:
-                    final[1][1] = 7
-                elif hd == 1 and final[0][1] == 7:
-                    final[1][1] = 0
-                # Third thing: enabling pieces to take over their opponent's bottom (their top) edges, on the edges where their pawns can promote
-                if vd == -1 and piece > 0 and final[0][0] == 0:
-                    final[0][1] = 7
-                elif vd == 1 and piece < 0 and final[0][0] == 7:
-                    final[0][1] = 0
-            return final
-        
-        def execute_edge_effects(jump_list: list[Jump]) -> list[Jump]:
-            for jump in jump_list:
-                    take_and_destination_tuple: tuple[Square, Square] = tuple[jump[1], jump[2]]
-                    actual_tuple = edge_effects(take_and_destination_tuple)
-                    jump[1] = actual_tuple[0]
-                    jump[2] = actual_tuple[1]
-            return jump_list
 
-        def pawn():
+        def edge_effects(
+            taken: Square,
+            land: Square,
+        ) -> tuple[Square, Square] | None:  # taken is the square of the taken piece
+            # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col), as a reminder)
+            # *** This method executes edge effects for jumps if they're necessary and/or possible***
+            # *** This method returns the tuple of the taking then destination square IF the destination square is 'off' the edge
+            # first element in tuple = square on which piece is being taken; second element in tuple = final destination of square
+            # Reminder: square = starting square as a tuple of (row, col)
+            #
+            # edge effects both ensures that moves are made within bounds, and that jumps don't land ontop of pieces
+            piece = self.piece_at(square)
+            #taken_piece = self.piece_at(taken)
+            # First thing: making sure that the piece exists, is taking a piece, and is moving to an empty destination square
+            #assert piece != 0 and taken_piece != 0 and self.empty(land)
+            # check. Is the landing square in bounds? (if so, just return what we got)
+            if in_bounds(land):
+                if self.empty(land):
+                    return (taken, land)
+                else:
+                    return None
+
+            # its not in bounds. time to rectify it
+            land_row, land_col = land
+            rectifier = {7: -1, 8: 0}
+            if 0 <= land_col >= 7 :
+                land_col = rectifier[land_col]
+
+            if piece > 0:  # color is white
+                if land_row == 8:
+                    return None  # White can only jump over blacks row (to index -1)
+                elif land_row == -1:
+                    land_row = 7
+            if piece < 0:  # color black
+                if land_row == -1:
+                    return None  # Black can only jump over whites row (to index 8)
+                elif land_row == 8:
+                    land_row = 0
+
+            land = (land_row, land_col)
+            if not self.empty(land):
+                return None
+
+            return (taken, (land_row, land_col))
+
+        def execute_edge_effects(
+            moves_list: list[tuple[Square, Square]]
+        ) -> list[
+            tuple[Square, Square]
+        ]:  # moves_list = list of moves: this method parses through the list and replaces tuples
+            # of destination squares off the edge of the board with onboard squares, accounting for edge effects.
+            # square = starting square of jump
+            return list(
+                filter(
+                    None,
+                    [edge_effects(move[0], move[1]) for move in moves_list],
+                )
+            )
+            # for i in range(0, len(moves_list)):
+            #     if not edge_effects(square, moves_list[i]) == (-1, -1):
+            #         moves_list[i] = edge_effects(square, moves_list[i])
+            # return moves_list
+
+        def pawn() -> list[tuple[Square, Square]]:
 
             c = -1 if p < 0 else 1
             d = -c
             possible_pieces = [add_sq_dir(square, (d, 1)), add_sq_dir(square, (d, -1))]
-            # factoring in edge effects: performing the algorithm if it is actually on an edge (checking if it = (-1, -1), which 
-            # is the result of a piece not actually taking a piece on a board edge)
-            for i in range(0, len(possible_pieces)):
-                if not edge_effects(square, possible_pieces[i]) == (-1, -1):
-                    possible_pieces[i] = edge_effects(square, possible_pieces[i])
             possible_pieces = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
-            possible_pieces = [
-                (mv, add_dir(mv))
-                for mv in possible_pieces
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
+            possible_pieces = [(mv, add_dir(mv)) for mv in possible_pieces]
+            possible_pieces = execute_edge_effects(possible_pieces)
 
-            # TODO right now this won't allow taking around the edges. fix that
-            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            # Debangshu is on it! this is his solution!!!
-            possible_pieces = execute_edge_effects(square, possible_pieces)
             return possible_pieces
 
-        def knight():
+        def knight() -> list[tuple[Square, Square]]:
             def split_dir(direction: Direction) -> list[Direction]:
                 return [(direction[0], 0), (0, direction[1])]
 
@@ -725,47 +785,35 @@ R N B Q K B N R
                 d = split_dir(jump_direction(mv))
                 new_moves.append((mv, add_sq_dir(mv, d[0])))
                 new_moves.append((mv, add_sq_dir(mv, d[1])))
-            new_moves = [
-                mv for mv in new_moves if in_bounds(mv[1]) and self.empty(mv[1])
-            ]
+            new_moves = execute_edge_effects(new_moves)
+            # new_moves = [
+            #     mv for mv in new_moves if in_bounds(mv[1]) and self.empty(mv[1])
+            # ]
             # taking over the edges again
-            new_moves = execute_edge_effects(square, new_moves)
             return new_moves
 
-        def bishop():
+        def bishop() -> list[tuple[Square, Square]]:
             directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
             possible_pieces = [direxp(d) for d in directions]
             moves = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
-            moves = [
-                (mv, add_dir(mv))
-                for mv in moves
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
-            # TODO right now this won't allow taking around the edges. fix that
-            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            # Yes he has!!!
-            moves = execute_edge_effects(square, moves)
+            moves = [(mv, add_dir(mv)) for mv in moves]  # gen all the moves
+            moves = execute_edge_effects(moves)
+            # filter/ensure all in bounds/wrap around/landing on empty
             return moves
 
-        def rook():
+        def rook() -> list[tuple[Square, Square]]:
             directions = [(0, 1), (0, -1), (-1, 0), (1, 0)]
             possible_pieces = [direxp(d) for d in directions]
             moves = [
                 mv for mv in possible_pieces if in_bounds(mv) and not self.empty(mv)
             ]
-            moves = [
-                (mv, add_dir(mv))
-                for mv in moves
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
-            # TODO right now this won't allow taking around the edges. fix that
-            # debangshu prob already handled something like this in the move checking. look there for inspo/stuff to can copy
-            moves = execute_edge_effects(square, moves)
+            moves = [(mv, add_dir(mv)) for mv in moves]
+            moves = execute_edge_effects(moves)
             return moves
 
-        def queen():
+        def queen() -> list[tuple[Square, Square]]:
             if qctx == None:
                 return bishop() + rook()
             elif qctx == "diag":
@@ -773,7 +821,7 @@ R N B Q K B N R
             else:
                 return rook()
 
-        def king():
+        def king() -> list[tuple[Square, Square]]:
             moves = [
                 (-1, 1),
                 (0, 1),
@@ -786,12 +834,8 @@ R N B Q K B N R
             ]
             moves = [add_sq_dir(square, m) for m in moves]
             moves = [m for m in moves if in_bounds(m) and not self.empty(m)]
-            moves = [
-                (mv, add_dir(mv))
-                for mv in moves
-                if in_bounds(add_dir(mv)) and self.empty(add_dir(mv))
-            ]
-            moves = execute_edge_effects(square, moves)
+            moves = [(mv, add_dir(mv)) for mv in moves]
+            moves = execute_edge_effects(moves)
             return moves
 
         def empty() -> list[tuple[Square, Square]]:
@@ -806,14 +850,39 @@ R N B Q K B N R
 
     def square_jumps_recursive(
         self, square: Square, qctx: QueenContext = None
-    ) -> list[JumpMove] | None:
+    ) -> list[JumpMove]:
         def new_qctx(jump: Jump) -> QueenContext:
             # Basically, see if the queen jumped, and if so, which way
             # Straight or Diagonal???
-            # if not isQueenJump ==> 
-            pass
+            # if not isQueenJump ==>
+            def diagonalp(jump: Jump) -> bool:
+                d = jump_direction(jump)
+                return d in [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 
-        def jump_end(jump: Jump) -> Square:
+            if self.piece_at(jump_start(jump)) == 5:
+                if diagonalp(jump):
+                    return "diag"
+                else:
+                    return "straight"
+            return None
+
+        def jump_direction(jump: Jump) -> Direction:
+            # taken is the square of the taken piece
+            taken = jump_take(jump)
+            end = jump_land(jump)
+
+            def sign(num: int):
+                return -1 if num < 0 else 0 if num == 0 else 1
+
+            return (sign(end[0] - taken[0]), sign(end[1] - taken[1]))
+
+        def jump_start(jump: Jump) -> Square:
+            return jump[0]
+
+        def jump_take(jump: Jump) -> Square:
+            return jump[1]
+
+        def jump_land(jump: Jump) -> Square:
             return jump[2]
 
         jumps: list[Jump] = self.square_jumps(square, qctx)
@@ -823,25 +892,25 @@ R N B Q K B N R
         # What I want this to return is a list of moves I can prepend a jump to
 
         if len(jumps) == 0:
-            return None
+            return []
 
         # TODO implement Board.copy() and Board.do_jump(Jump)
 
-        def next_level(jump: Jump) -> list[JumpMove] | None:
+        def next_level(jump: Jump) -> list[JumpMove]:
             nb = self.copy()  # Copy board
             nb.do_jump(jump)  # Execute move
             ctx = new_qctx(jump)
             # Get the new ctx (see if queen jumped diag or straight basically)
-            return nb.square_jumps_recursive(jump_end(jump), ctx)
+            return nb.square_jumps_recursive(jump_land(jump), ctx)
             # Check for more jumps this piece can do (so look at where it landed)
             #
 
         output: list[JumpMove] = []
         for jump in jumps:
-            next_jumps = next_level(jump)
-            if next_jumps == None:
-                output.append([jump])  # [jump] is a valid JumpMove
-            else:
+            next_jumps: list[JumpMove] = next_level(jump)
+            # if next_jumps == None:
+            output.append([jump])  # [jump] is a valid JumpMove
+            if len(next_jumps) != 0:
                 for next_jump in next_jumps:
                     output.append([jump] + next_jump)
         # This feels mostly complete/roughed out, but the base case feels wrong.
@@ -852,7 +921,7 @@ R N B Q K B N R
         return 0 == self.piece_at(square)
 
     def copy(self):
-        return Board(False, self.__str__())
+        return Board(False, self.__str__(), copy=True)
 
     def do_jump(self, jump: Jump):
         # assume it is valid
@@ -863,7 +932,7 @@ R N B Q K B N R
         self.put_at(0, take)
         self.put_at(p, land)
 
-    def do_step(self, step: Step) -> None: 
+    def do_step(self, step: Step) -> None:
         (start, end) = step
         p: Piece = self.piece_at(square=start)
         self.put_at(p=0, sq=start)
@@ -875,6 +944,16 @@ R N B Q K B N R
         else:
             for m in move:
                 self.do_jump(m)
+
+    # how we add a move to the board
+    def push(self, move: Move) -> None:
+        if move in self.moves:
+            self.do_move(move)
+            self.turns += 1
+            self.color *= -1
+            self.moves = self.calc_moves(self.color)
+        else:
+            print("illegal move")
 
     def put_at(self, p: Piece, sq: Square):
         r, c = sq

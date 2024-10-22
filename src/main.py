@@ -15,10 +15,10 @@ class Main:
         pygame.init()
         self.screen = pygame.display.set_mode((800, 800))
         self.display = Display(self.screen)
-        self.board = self.display.board
-        print(self.board.squares)
         self.display.draw_board(self.screen)
         self.board = Board()
+        self.display.board = self.board
+        print(self.board.squares)
         self.turns_played = 0
 
     def __step__(self, surface, start: Square):  
@@ -93,14 +93,24 @@ class Main:
 
     def pve(self, surface) -> None:
         _ = pygame.init()
+        self.display.draw_board(self.screen)
+        pygame.display.update()
         while True:
-            self.display.draw_board(surface)
+            self.display.draw_board(self.screen)
             move = self.board.from_UCN(input(""))
             print(move)
-            self.board.do_move(move)
-            print(self.board)
-            self.display.update_board(surface)
+            print("COLOR: white") if self.display.board.color == 1 else print("COLOR: black")
+            self.display.board.push(move)
+            print(self.display.board)
+            self.display.draw_board(self.screen)
+            pygame.display.update()
+
+def script() -> str:
+        text = input("Please enter a number between 1 and 10")
+        return text
+
 # script()
+# Yay
 
 main = Main()
-main.main_loop()
+main.pve()
