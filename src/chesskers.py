@@ -86,6 +86,8 @@ R N B Q K B N R
         if not copy:
             self.moves = self.calc_moves(self.color)
 
+        self.pb = None
+
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
@@ -986,6 +988,7 @@ R N B Q K B N R
         self.put_at(p, sq=end)
 
     def do_move(self, move: Move) -> None:
+        self.pb = self
         if self.is_step(move):
             self.do_step(move)
         else:
@@ -995,15 +998,17 @@ R N B Q K B N R
     # how we add a move to the board
     def push(self, move: Move) -> None:
         if move in self.moves:
+            self.pb = self
             self.do_move(move)
             self.turns += 1
             self.color *= -1
             self.moves = self.calc_moves(self.color)
         else:
-            print("illegal move")
+            pass
     
     # unmake a move
-    #def pop();
+    def pop(self):
+       self = self.pb 
 
 
     def put_at(self, p: Piece, sq: Square):

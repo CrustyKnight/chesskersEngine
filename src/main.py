@@ -111,7 +111,6 @@ class Main:
 
             bot_move = find_best_move(self.display.board, 1)
             self.display.board.push(bot_move)
-            print(bot_move)
             print("BOT MOVE: "+self.display.board.to_UCN(bot_move))
             update_display()
 
