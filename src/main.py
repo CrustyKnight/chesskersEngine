@@ -78,7 +78,7 @@ class Main:
         return print("yay")
 
     def main_loop(self):
-        pygame.init()
+        _ = pygame.init()
         while True:
             row, col = pygame.mouse.get_pos()
             row //= SQ_SIZE
@@ -107,6 +107,7 @@ class Main:
             move = self.board.from_UCN(input(""))
             print("MOVE: "+self.display.board.to_UCN(move))
             self.display.board.push(move)
+            self.display.board.pop()
             update_display()
 
             bot_move = find_best_move(self.display.board, 1)
