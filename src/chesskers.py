@@ -703,10 +703,13 @@ R N B Q K B N R
         return moves
 
     # Actual move jump generation function.
-    def square_jumps(self, square: Square, qctx: QueenContext = None) -> list[Jump]:
+    def square_jumps(
+        self, square: Square, qctx: QueenContext = None, start: bool = True
+    ) -> list[Jump]:
         # ctx is really just for the queen right now.
         # it will be a map { queen: ("diag"|"straight")}
         # maybe later it will just become a number (if efficiency matters a lot)
+        # start is if this is the first jump. (for bishops and stuff)
         def direxp(direction: Direction) -> Square:
             # TODO mod this to give the location of the piece it hits, not all the squares before
             # and give nothing if it hits the edge
@@ -733,6 +736,11 @@ R N B Q K B N R
 
         def add_dir(mv: Square):
             return add_sq_dir(mv, jump_direction(mv))
+
+        def single_square_jump(mv: tuple[Square, Square]) -> bool:
+            # if taken of mv is only one square away from square
+            taken, _ = mv
+            return (abs(square[0] - taken[0]) <= 1) and (abs(square[1] - taken[1]) <= 1)
 
         def edge_effects(
             taken: Square,
@@ -847,6 +855,8 @@ R N B Q K B N R
             moves = [(mv, add_dir(mv)) for mv in moves]  # gen all the moves
             moves = execute_edge_effects(moves)
             # filter/ensure all in bounds/wrap around/landing on empty
+            if not start:
+                moves = [mv for mv in moves if single_square_jump(mv)]
             return moves
 
         def rook() -> list[tuple[Square, Square]]:
@@ -857,6 +867,8 @@ R N B Q K B N R
             ]
             moves = [(mv, add_dir(mv)) for mv in moves]
             moves = execute_edge_effects(moves)
+            if not start:
+                moves = [mv for mv in moves if single_square_jump(mv)]
             return moves
 
         def queen() -> list[tuple[Square, Square]]:
@@ -895,8 +907,9 @@ R N B Q K B N R
         return [(square, jmp[0], jmp[1]) for jmp in dispatch[abs(p)]()]
 
     def square_jumps_recursive(
-        self, square: Square, qctx: QueenContext = None
+        self, square: Square, qctx: QueenContext = None, start: bool = True
     ) -> list[JumpMove]:
+        # Start is true if this is the first jump, for bishops and stuff no not jump too far
         def new_qctx(jump: Jump) -> QueenContext:
             # Basically, see if the queen jumped, and if so, which way
             # Straight or Diagonal???
@@ -931,7 +944,7 @@ R N B Q K B N R
         def jump_land(jump: Jump) -> Square:
             return jump[2]
 
-        jumps: list[Jump] = self.square_jumps(square, qctx)
+        jumps: list[Jump] = self.square_jumps(square, qctx, start)
 
         # Base case is there is no more jumps possible from that square
         # One above that is the piece could make some jumps.
@@ -947,7 +960,7 @@ R N B Q K B N R
             nb.do_jump(jump)  # Execute move
             ctx = new_qctx(jump)
             # Get the new ctx (see if queen jumped diag or straight basically)
-            return nb.square_jumps_recursive(jump_land(jump), ctx)
+            return nb.square_jumps_recursive(jump_land(jump), ctx, False)
             # Check for more jumps this piece can do (so look at where it landed)
             #
 
@@ -971,10 +984,9 @@ R N B Q K B N R
         b.moves = self.moves
         return b
 
-
     def do_jump(self, jump: Jump):
         # assume it is valid
-        # handle en-passant
+        # TODO handle en-passant
         (start, take, land) = jump
         p = self.piece_at(start)
         self.put_at(0, start)
@@ -982,6 +994,7 @@ R N B Q K B N R
         self.put_at(p, land)
 
     def do_step(self, step: Step) -> None:
+        # TODO handle en-passant
         (start, end) = step
         p: Piece = self.piece_at(square=start)
         self.put_at(p=0, sq=start)
