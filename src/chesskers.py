@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 from bot import find_best_move
-from bot import val_map
-
 
 from typing import Literal, TypeAlias
 
@@ -84,8 +82,10 @@ R N B Q K B N R
         #         """)
         self.turns = 0
         self.color = 1 if self.turns % 2 == 0 else -1
+        self.moves = []
         if not copy:
             self.moves = self.calc_moves(self.color)
+
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
@@ -489,6 +489,50 @@ R N B Q K B N R
             return True
 
         return False
+
+    def game_over(self) -> bool:
+        sqs = [sq for row in self.squares for sq in row]
+        return True if 6 not in sqs or -6 not in sqs else False
+
+    def to_UCN(self, move: Move) -> str:
+        square_map = {0:"a", 1:"b", 2:"c", 3:"d", 4:"e", 5:"f", 6:"g", 7:"h"}
+        res:str = ""
+        if self.is_step(move):
+            start, end = move 
+            s1, s2 = start
+            e1, e2 = end 
+
+            res += square_map[s2]
+            res += str(8-s1)
+
+            res += square_map[e2]
+            res += str(8-e1)
+
+            return res
+            
+        i = 0
+        for m in move:
+            start, end, hop = m
+            s1, s2 = start 
+            e1, e2 = end 
+            # h stands for hawk
+            h1, h2 = hop 
+
+            if s1 >= 0 and s2 >= 0:
+                res+=square_map[s2]
+                res+=str(8 - s1)
+            if e1 >= 0 and e2 >= 0:
+                res+=square_map[e2]
+                res+=str(8-e1)
+            res+="t"
+            if h1 >= 0 and h2 >= 0:
+                res+=square_map[h2]
+                res+=str(8-h1)
+            i+=1
+            if i < len(move):
+                res+="|" 
+            
+        return res
 
     # Universal Chesskers Notation
     def from_UCN(self, move: str) -> Move:
@@ -921,7 +965,10 @@ R N B Q K B N R
         return 0 == self.piece_at(square)
 
     def copy(self):
-        return Board(False, self.__str__(), copy=True)
+        b = Board(fen=False, board=self.__str__(), copy=True)
+        b.moves = self.moves
+        return b
+
 
     def do_jump(self, jump: Jump):
         # assume it is valid
@@ -954,6 +1001,10 @@ R N B Q K B N R
             self.moves = self.calc_moves(self.color)
         else:
             print("illegal move")
+    
+    # unmake a move
+    #def pop();
+
 
     def put_at(self, p: Piece, sq: Square):
         r, c = sq
