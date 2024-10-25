@@ -44,6 +44,21 @@ def sevaluate(board: Board) -> int:
 
     return total
 
+def knight_col_favors(board: Board) -> float:
+    def knight(square:Square) -> float:
+        row, col = square
+        if col/6 > col/3:
+            return 7 + col/6
+        else:
+            return 7 + col/3
+
+    total = 0 
+
+    for row in range(0,8):
+        for col in range(0,8):
+            piece = board.piece_at((row,col))
+            total+=(piece/7)*knight((row,col)) if abs(piece == 2) else total+val_map[piece] 
+    return total
 
 evaluate = sevaluate
 
@@ -72,6 +87,7 @@ def alphabeta(board:board, depth:int) -> int | float:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
         #   other standard move ordering heuristics
+        
 
         #omoves = sorted(moves, key=lambda x: evalmove(x))
         omoves = [[m, 0] for m in moves]
@@ -81,11 +97,10 @@ def alphabeta(board:board, depth:int) -> int | float:
                 mv[1] += 0.85*(evalmove(mv[1])) 
                 start, end = mv[0]
                 mv[1] += 0.2*(1 if abs(board.piece_at(start)) == 2 else 0) 
-                mv[1] += evalmove(mv[0][0])
 
         return sorted(omoves, key=lambda x: x[1])
 
-    def abmax(board: Board, depth: int, alpha: int, beta: int) -> int:
+    def abmax(depth: int, alpha: int, beta: int) -> int:
         if depth == 1:
             return evaluate(board)
 
@@ -100,7 +115,7 @@ def alphabeta(board:board, depth:int) -> int | float:
         for move in mvs:
             # change if needed
             tb.push(move)
-            val = abmin(board, depth - 1, alpha, beta)
+            val = abmin(depth - 1, alpha, beta)
 
             if val >= beta:
                 break
@@ -111,7 +126,7 @@ def alphabeta(board:board, depth:int) -> int | float:
             tb.pop()
         return alpha
 
-    def abmin(board, depth, alpha, beta):
+    def abmin(depth:int, alpha:int, beta:int):
         if depth == 1:
             return evaluate(board)
 
@@ -122,7 +137,7 @@ def alphabeta(board:board, depth:int) -> int | float:
         for move in moves:
             # change if needed
             tb.push(move)
-            val = abmax(board, depth - 1, alpha, beta)
+            val = abmax(depth - 1, alpha, beta)
 
             if val <= alpha:
                 break
@@ -135,9 +150,9 @@ def alphabeta(board:board, depth:int) -> int | float:
 
     # change if needed
     if board.color == 1:
-        return abmax(board, depth, float("-inf"), float("inf"))
+        return abmax(depth, float("-inf"), float("inf"))
     else:
-        return abmin(board, depth, float("-inf"), float("inf"))
+        return abmin(depth, float("-inf"), float("inf"))
 
 
 def find_best_move(board:object, depth:int) -> Move:

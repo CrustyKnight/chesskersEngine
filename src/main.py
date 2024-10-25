@@ -1,4 +1,5 @@
 import pygame
+from time import sleep
 
 from chesskers import Board
 from chesskers import Square
@@ -7,6 +8,7 @@ from display import Display
 from constants import *
 
 from bot import find_best_move 
+from bot import evaluate 
 
 import re
 def is_ucn(move: str) -> bool:
@@ -81,6 +83,7 @@ class Main:
             row //= SQ_SIZE
             col //= SQ_SIZE
 
+        # 2
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -92,7 +95,6 @@ class Main:
 
     def pve(self) -> None:
         def update_display():
-            print(self.display.board)
             self.display.draw_board(self.screen)
             pygame.display.update()
 
@@ -101,15 +103,31 @@ class Main:
         pygame.display.update()
         while True:
             self.display.draw_board(self.screen)
-            move = self.board.from_UCN(input(""))
+            move = self.display.board.from_UCN(input(""))
             print("MOVE: "+self.display.board.to_UCN(move))
             self.display.board.push(move)
             update_display()
 
             bot_move = find_best_move(self.display.board, depth=2)
-            self.display.board.push(bot_move)
+
+            
+            #if self.display.board.is_jump(bot_move):
+            if self.display.board.is_jump(bot_move):
+                for m in bot_move:
+                    self.display.board.do_jump(m)
+                    update_display()
+                    sleep(0.5)
+                self.display.board.turns += 1
+                self.display.board.color *= -1
+                self.display.board.moves = self.display.board.calc_moves(self.display.board.color)
+                
+                    
+            else:
+                self.display.board.push(bot_move)
             print("BOT MOVE: "+self.display.board.to_UCN(bot_move))
+            print("BOT EVALUATION: "+str(evaluate(self.display.board)))
             update_display()
+            print(self.display.board)
 
             if self.display.board.game_over():
                 print("GAME IS OVER")
@@ -124,4 +142,4 @@ def script() -> str:
 # Yay
 
 main = Main()
-main.main_loop()
+main.pve()
