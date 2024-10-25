@@ -1,5 +1,5 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
-# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
+# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn! # He actually plays well lol. 
 from typing import TypeAlias
 from chesskers import Board
 

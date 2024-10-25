@@ -566,7 +566,7 @@ R N B Q K B N R
         return res
 
     # Universal Chesskers Notation
-    def from_UCN(self, move: str) -> Move:
+    def from_ (self, move: str) -> Move:
         # for e4e5 and cases like that
         def parse_step(move: str) -> Step:
             start = move[:2]
@@ -672,7 +672,7 @@ R N B Q K B N R
             c = -1 if p < 0 else 1
             d = -c
             moves = [add_sq_dir(square, (d, 0))]
-            # add thingy to tell if at start spot and add another move
+            # added thingy to tell if at start spot and add another move
             start_row = 6 if p == 1 else 1
             if square[0] == start_row:
                 moves.append(add_sq_dir(square, (d * 2, 0)))

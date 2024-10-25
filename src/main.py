@@ -18,8 +18,7 @@ class Main:
         self.screen = pygame.display.set_mode((800, 800))
         self.display = Display(self.screen)
         self.display.draw_board(self.screen)
-        self.board = Board()
-        self.display.board = self.board
+        self.board = self.display.board
         print(self.board.squares)
         self.turns_played = 0
 
@@ -48,21 +47,19 @@ class Main:
         start_col = col_dict[user_UCN[0]]
         final_row = ROWS - int(user_UCN[len(user_UCN) - 1])
         final_col = col_dict[user_UCN[len(user_UCN) - 2]] 
-        if user_UCN.__contains__("t"):
-            taken_row = ROWS - int(user_UCN[4])
-            taken_col = col_dict[user_UCN[3]]
-            taken: Square = (taken_row, taken_col)
 
         # Getting squares into tuples to enter into check_valid_step and check_valid_jump methods
         start: Square = (start_row, start_col)
         final: Square = (final_row, final_col)
-        piece = self.board.piece_at(start)
-
-        if taken == None:
-            is_valid_move = self.board.check_valid_step(start, final)
-        else:
-            self.board.squares[taken_row][taken_col] = 0
+        piece: int = self.board.piece_at(start)
+        
+        if user_UCN.__contains__("t"):
+            taken_row = ROWS - int(user_UCN[3])
+            taken_col = col_dict[user_UCN[2]]
+            taken: Square = (taken_row, taken_col)
             is_valid_move = self.board.check_valid_jump(start, taken, final)
+        else:
+            is_valid_move = self.board.check_valid_step(start, final)
 
         if not is_valid_move:
             return None
@@ -88,7 +85,7 @@ class Main:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    pass
+                    self.__move__(self.screen)
                     #TODO: implement move. 
             self.display.draw_board(self.screen)
             pygame.display.update()
@@ -127,4 +124,4 @@ def script() -> str:
 # Yay
 
 main = Main()
-main.pve()
+main.main_loop()
