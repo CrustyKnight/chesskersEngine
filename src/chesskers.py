@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from bot import find_best_move
 
 from typing import Literal, TypeAlias
 
@@ -1048,11 +1047,12 @@ R N B Q K B N R
 
     # unmake a move
     def pop(self):
-        self.squares = self.pb.squares 
-        self.moves = self.pb.moves 
-        self.color = self.pb.color
-        self.turns = self.pb.turns
-        self.pb = self.pb.pb
+        if self.pb != None:
+            self.squares = self.pb.squares 
+            self.moves = self.pb.moves 
+            self.color = self.pb.color
+            self.turns = self.pb.turns
+            self.pb = self.pb.pb
 
     def put_at(self, p: Piece, sq: Square):
         r, c = sq

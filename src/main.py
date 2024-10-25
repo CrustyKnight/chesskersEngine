@@ -107,10 +107,9 @@ class Main:
             move = self.board.from_UCN(input(""))
             print("MOVE: "+self.display.board.to_UCN(move))
             self.display.board.push(move)
-            self.display.board.pop()
             update_display()
 
-            bot_move = find_best_move(self.display.board, 1)
+            bot_move = find_best_move(self.display.board, depth=2)
             self.display.board.push(bot_move)
             print("BOT MOVE: "+self.display.board.to_UCN(bot_move))
             update_display()
