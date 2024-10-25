@@ -1,9 +1,9 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
-# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn!
-from typing import Literal, TypeAlias
+# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn! # He actually plays well lol. 
+from typing import TypeAlias
 
-Square: TypeAlias = tuple[int, int]
 Board: TypeAlias = list[list[int]]
+Square: TypeAlias = tuple[int, int]
 Step: TypeAlias = tuple[Square, Square]
 Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
@@ -49,7 +49,7 @@ evaluate = sevaluate
 def evaluate_move(move: Move, board: Board, depth:int):
     # change if needed
     tb = board.copy()
-    tb.move(move)
+    tb.push(move)
 
     score = alphabeta(tb, depth)
     return [score, move]
@@ -83,7 +83,7 @@ def alphabeta(board, depth:int) -> int | float:
 
         for move in mvs:
             # change if needed
-            tb.move(move)
+            tb.push(move)
             val = abmin(board, depth - 1, alpha, beta)
 
             if val >= beta:
@@ -92,7 +92,7 @@ def alphabeta(board, depth:int) -> int | float:
                 alpha = val
 
             # change if needed
-            tb.unmove()
+            tb.pop()
         return alpha
 
     def abmin(board, depth, alpha, beta):
@@ -101,11 +101,11 @@ def alphabeta(board, depth:int) -> int | float:
 
         tb = board.copy()
 
-        moves = order_moves(tb.legal_moves, tb)
+        moves = order_moves(tb.moves, tb)
 
         for move in moves:
             # change if needed
-            tb.move(move)
+            tb.push(move)
             val = abmax(board, depth - 1, alpha, beta)
 
             if val <= alpha:
@@ -114,17 +114,17 @@ def alphabeta(board, depth:int) -> int | float:
                 beta = val
 
             # change if needed
-            tb.unmove()
+            tb.pop()
         return beta
 
     # change if needed
-    if board.turn == board.white:
+    if board.color == 1:
         return abmax(board, depth, float("-inf"), float("inf"))
     else:
         return abmin(board, depth, float("-inf"), float("inf"))
 
 
-def find_best_move(board, depth):
+def find_best_move(board:object, depth:int) -> Move:
     # change if needed
     white = True if board.color == 1 else False
 

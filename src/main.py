@@ -5,8 +5,10 @@ from chesskers import Square
 
 from display import Display
 from constants import *
-import re
 
+from bot import find_best_move 
+
+import re
 def is_ucn(move: str) -> bool:
     return True
 
@@ -73,7 +75,7 @@ class Main:
         return print("yay")
 
     def main_loop(self):
-        pygame.init()
+        _ = pygame.init()
         while True:
             row, col = pygame.mouse.get_pos()
             row //= SQ_SIZE
@@ -88,19 +90,32 @@ class Main:
             self.display.draw_board(self.screen)
             pygame.display.update()
 
-    def pve(self, surface) -> None:
+    def pve(self) -> None:
+        def update_display():
+            print(self.display.board)
+            self.display.draw_board(self.screen)
+            pygame.display.update()
+
         _ = pygame.init()
         self.display.draw_board(self.screen)
         pygame.display.update()
         while True:
             self.display.draw_board(self.screen)
             move = self.board.from_UCN(input(""))
-            print(move)
-            print("COLOR: white") if self.display.board.color == 1 else print("COLOR: black")
+            print("MOVE: "+self.display.board.to_UCN(move))
             self.display.board.push(move)
-            print(self.display.board)
-            self.display.draw_board(self.screen)
-            pygame.display.update()
+            self.display.board.pop()
+            update_display()
+
+            bot_move = find_best_move(self.display.board, 1)
+            self.display.board.push(bot_move)
+            print("BOT MOVE: "+self.display.board.to_UCN(bot_move))
+            update_display()
+
+            if self.display.board.game_over():
+                print("GAME IS OVER")
+                break
+            
 
 def script() -> str:
         text = input("Please enter a number between 1 and 10")

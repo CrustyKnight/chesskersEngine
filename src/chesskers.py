@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 from bot import find_best_move
-from bot import val_map
-
 
 from typing import Literal, TypeAlias
 
@@ -62,7 +60,7 @@ p p p p p p p p
 P P P P P P P P
 R N B Q K B N R
 """,
-        copy: bool = False
+        copy: bool = False,
     ):
         self.squares: list[list[Piece]]
         self.squares = [[0 for _ in range(8)] for _ in range(8)]
@@ -84,8 +82,11 @@ R N B Q K B N R
         #         """)
         self.turns = 0
         self.color = 1 if self.turns % 2 == 0 else -1
+        self.moves = []
         if not copy:
             self.moves = self.calc_moves(self.color)
+
+        self.pb:None|Board = None
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
@@ -308,32 +309,44 @@ R N B Q K B N R
 
         # Jump functions of individual pieces
         def check_pawn_jump():
-            if abs(vertical_distance) == abs(horizontal_distance) == 2: # Checking for on-board jumps
+            if (
+                abs(vertical_distance) == abs(horizontal_distance) == 2
+            ):  # Checking for on-board jumps
                 # Checking that row and col of piece being taken is between the start and final squares
-                if not ((start_row < taken_row < final_row or final_row < taken_row < start_row)
-                        or (start_col < taken_col < final_col or final_col < taken_col < start_col)):
+                if not (
+                    (
+                        start_row < taken_row < final_row
+                        or final_row < taken_row < start_row
+                    )
+                    or (
+                        start_col < taken_col < final_col
+                        or final_col < taken_col < start_col
+                    )
+                ):
                     return False
                 if piece == 1:  # White pawn jump
                     if (
                         vertical_distance > 0
                     ):  # White pawns travel UP the board, NOT DOWN the board.
                         return False
-                else: # Black pawn jump
+                else:  # Black pawn jump
                     if (
                         vertical_distance < 0
                     ):  # Black pawns travel DOWN the board, NOT UP the board.
                         return False
-                return (
-                    True
-                )  # Returning True if a piece is being taken, otherwise return False.
-            else: # Checking for jumps over the vertical and horizontal edges
+                return True  # Returning True if a piece is being taken, otherwise return False.
+            else:  # Checking for jumps over the vertical and horizontal edges
                 # checking columns: all pieces can take over the left and right edges of the board
                 if abs(start_col - taken_col) == 1:
                     if taken_col == 0 or 7:
-                        correct_col_bool = final_col == 7 if taken_col == 0 else final_col == 0
+                        correct_col_bool = (
+                            final_col == 7 if taken_col == 0 else final_col == 0
+                        )
                 if abs(start_row - taken_col) == 1:
                     if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
-                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                        correct_row_bool = (
+                            final_row == 0 if taken_row == 7 else final_row == 7
+                        )
                 return correct_row_bool or correct_col_bool
 
         def check_knight_jump():
@@ -359,14 +372,18 @@ R N B Q K B N R
                     )
                     != 0
                 )
-            else: # Checking for edge effects of knights
+            else:  # Checking for edge effects of knights
                 if abs(start_row - taken_row) == 2:
                     if taken_col == 0 or 7:
-                        correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                        correct_col_bool = (
+                            final_col == 0 if taken_col == 7 else final_col == 7
+                        )
                 if abs(start_col - taken_col) == 2:
                     if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
-                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
-                return correct_row_bool or correct_col_bool 
+                        correct_row_bool = (
+                            final_row == 0 if taken_row == 7 else final_row == 7
+                        )
+                return correct_row_bool or correct_col_bool
 
         def check_bishop_jump(isFirstJump=isFirstJumpOverall):
             if (
@@ -392,12 +409,16 @@ R N B Q K B N R
                         )
                         != 0
                     )
-            if vertical_distance != horizontal_distance: # edge effects
-                if abs(taken_col - start_col) == abs (taken_row - start_row):
+            if vertical_distance != horizontal_distance:  # edge effects
+                if abs(taken_col - start_col) == abs(taken_row - start_row):
                     if taken_col == 0 or 7:
-                        correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                        correct_col_bool = (
+                            final_col == 0 if taken_col == 7 else final_col == 7
+                        )
                     if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
-                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                        correct_row_bool = (
+                            final_row == 0 if taken_row == 7 else final_row == 7
+                        )
                 return correct_row_bool or correct_col_bool
             return False
 
@@ -426,11 +447,17 @@ R N B Q K B N R
                         self.piece_at((start_row + vertical_distance - vd, start_col))
                         != 0
                     )
-            if (vertical_distance != 0 and horizontal_distance == 0) or (horizontal_distance != 0 and vertical_distance == 0): # edge effects:
+            if (vertical_distance != 0 and horizontal_distance == 0) or (
+                horizontal_distance != 0 and vertical_distance == 0
+            ):  # edge effects:
                 if taken_col == 0 or 7:
-                    correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
+                    correct_col_bool = (
+                        final_col == 0 if taken_col == 7 else final_col == 7
+                    )
                 if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
-                    correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                    correct_row_bool = (
+                        final_row == 0 if taken_row == 7 else final_row == 7
+                    )
             return correct_row_bool or correct_col_bool
 
         def check_queen_jump(isFirstJump=isFirstJumpOverall):
@@ -460,12 +487,17 @@ R N B Q K B N R
                     != 0
                 )
             elif not (abs(vertical_distance) == 2 or abs(horizontal_distance) == 2):
-                if (abs(start_col - taken_col) <= 1 or abs(start_row - taken_row) <= 1):
+                if abs(start_col - taken_col) <= 1 or abs(start_row - taken_row) <= 1:
                     if abs(start_row - start_col) == 1:
-                        correct_col_bool = final_col == 0 if taken_col == 7 else final_col == 7
-                    if((taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0)):
-                        correct_row_bool = final_row == 0 if taken_row == 7 else final_row == 7
+                        correct_col_bool = (
+                            final_col == 0 if taken_col == 7 else final_col == 7
+                        )
+                    if (taken_row == 0 and piece > 0) or (taken_row == 7 and piece < 0):
+                        correct_row_bool = (
+                            final_row == 0 if taken_row == 7 else final_row == 7
+                        )
                 return correct_col_bool or correct_row_bool
+
         # Performing functions based on what type of piece the piece is (1 = pawn, 2 = knight, 3 = bishop, 4 = rook, 5 = Queen, 6 = King)
         possible_functions = [
             0,
@@ -489,6 +521,50 @@ R N B Q K B N R
             return True
 
         return False
+
+    def game_over(self) -> bool:
+        sqs = [sq for row in self.squares for sq in row]
+        return True if 6 not in sqs or -6 not in sqs else False
+
+    def to_UCN(self, move: Move) -> str:
+        square_map = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
+        res: str = ""
+        if self.is_step(move):
+            start, end = move
+            s1, s2 = start
+            e1, e2 = end
+
+            res += square_map[s2]
+            res += str(8 - s1)
+
+            res += square_map[e2]
+            res += str(8 - e1)
+
+            return res
+
+        i = 0
+        for m in move:
+            start, end, hop = m
+            s1, s2 = start
+            e1, e2 = end
+            # h stands for hawk
+            h1, h2 = hop
+
+            if s1 >= 0 and s2 >= 0:
+                res += square_map[s2]
+                res += str(8 - s1)
+            if e1 >= 0 and e2 >= 0:
+                res += square_map[e2]
+                res += str(8 - e1)
+            res += "t"
+            if h1 >= 0 and h2 >= 0:
+                res += square_map[h2]
+                res += str(8 - h1)
+            i += 1
+            if i < len(move):
+                res += "|"
+
+        return res
 
     # Universal Chesskers Notation
     def from_ (self, move: str) -> Move:
@@ -536,8 +612,7 @@ R N B Q K B N R
 
         return M
 
-
-    #def calc_moves(self, color: Literal[-1, 1] | None = None):
+    # def calc_moves(self, color: Literal[-1, 1] | None = None):
     #    sqs = [(i, j) for i in range(0, 8) for j in range(0, 8)]
     #    sqs_white = [sq for sq in sqs if self.piece_at(sq) > 0]
     #    sqs_black = [sq for sq in sqs if self.piece_at(sq) < 0]
@@ -553,22 +628,21 @@ R N B Q K B N R
     #    return moves[self.color]
     #
     def calc_moves(self, color: Literal[-1, 1, 0]) -> list[Move]:
-        sqs: list[Square] = [(i, j) for i in range(0,8) for j in range(0,8)] 
-        
-        sqsw: list[Square] = [s for s in sqs if self.piece_at(s) > 0] 
+        sqs: list[Square] = [(i, j) for i in range(0, 8) for j in range(0, 8)]
+
+        sqsw: list[Square] = [s for s in sqs if self.piece_at(s) > 0]
         sqsb: list[Square] = [s for s in sqs if self.piece_at(s) < 0]
 
-        whitemoves: list[Move] = [mv for s in sqsw for mv in self.square_moves(s)] 
-        blackmoves: list[Move] = [mv for s in sqsb for mv in self.square_moves(s)] 
+        whitemoves: list[Move] = [mv for s in sqsw for mv in self.square_moves(s)]
+        blackmoves: list[Move] = [mv for s in sqsb for mv in self.square_moves(s)]
 
-# more aesthetically pleasing this way imo
+        # more aesthetically pleasing this way imo
         if color == -1:
             return blackmoves
         elif color == 1:
-            return whitemoves 
+            return whitemoves
         elif color == 0:
             return whitemoves + blackmoves
- 
 
     def square_moves(self, square: Square) -> list[Move]:
         # Should work.
@@ -657,10 +731,13 @@ R N B Q K B N R
         return moves
 
     # Actual move jump generation function.
-    def square_jumps(self, square: Square, qctx: QueenContext = None) -> list[Jump]:
+    def square_jumps(
+        self, square: Square, qctx: QueenContext = None, start: bool = True
+    ) -> list[Jump]:
         # ctx is really just for the queen right now.
         # it will be a map { queen: ("diag"|"straight")}
         # maybe later it will just become a number (if efficiency matters a lot)
+        # start is if this is the first jump. (for bishops and stuff)
         def direxp(direction: Direction) -> Square:
             # TODO mod this to give the location of the piece it hits, not all the squares before
             # and give nothing if it hits the edge
@@ -688,6 +765,11 @@ R N B Q K B N R
         def add_dir(mv: Square):
             return add_sq_dir(mv, jump_direction(mv))
 
+        def single_square_jump(mv: tuple[Square, Square]) -> bool:
+            # if taken of mv is only one square away from square
+            taken, _ = mv
+            return (abs(square[0] - taken[0]) <= 1) and (abs(square[1] - taken[1]) <= 1)
+
         def edge_effects(
             taken: Square,
             land: Square,
@@ -700,9 +782,9 @@ R N B Q K B N R
             #
             # edge effects both ensures that moves are made within bounds, and that jumps don't land ontop of pieces
             piece = self.piece_at(square)
-            #taken_piece = self.piece_at(taken)
+            # taken_piece = self.piece_at(taken)
             # First thing: making sure that the piece exists, is taking a piece, and is moving to an empty destination square
-            #assert piece != 0 and taken_piece != 0 and self.empty(land)
+            # assert piece != 0 and taken_piece != 0 and self.empty(land)
             # check. Is the landing square in bounds? (if so, just return what we got)
             if in_bounds(land):
                 if self.empty(land):
@@ -713,7 +795,7 @@ R N B Q K B N R
             # its not in bounds. time to rectify it
             land_row, land_col = land
             rectifier = {7: -1, 8: 0}
-            if 0 <= land_col >= 7 :
+            if 0 <= land_col >= 7:
                 land_col = rectifier[land_col]
 
             if piece > 0:  # color is white
@@ -801,6 +883,8 @@ R N B Q K B N R
             moves = [(mv, add_dir(mv)) for mv in moves]  # gen all the moves
             moves = execute_edge_effects(moves)
             # filter/ensure all in bounds/wrap around/landing on empty
+            if not start:
+                moves = [mv for mv in moves if single_square_jump(mv)]
             return moves
 
         def rook() -> list[tuple[Square, Square]]:
@@ -811,6 +895,8 @@ R N B Q K B N R
             ]
             moves = [(mv, add_dir(mv)) for mv in moves]
             moves = execute_edge_effects(moves)
+            if not start:
+                moves = [mv for mv in moves if single_square_jump(mv)]
             return moves
 
         def queen() -> list[tuple[Square, Square]]:
@@ -849,8 +935,9 @@ R N B Q K B N R
         return [(square, jmp[0], jmp[1]) for jmp in dispatch[abs(p)]()]
 
     def square_jumps_recursive(
-        self, square: Square, qctx: QueenContext = None
+        self, square: Square, qctx: QueenContext = None, start: bool = True
     ) -> list[JumpMove]:
+        # Start is true if this is the first jump, for bishops and stuff no not jump too far
         def new_qctx(jump: Jump) -> QueenContext:
             # Basically, see if the queen jumped, and if so, which way
             # Straight or Diagonal???
@@ -885,7 +972,7 @@ R N B Q K B N R
         def jump_land(jump: Jump) -> Square:
             return jump[2]
 
-        jumps: list[Jump] = self.square_jumps(square, qctx)
+        jumps: list[Jump] = self.square_jumps(square, qctx, start)
 
         # Base case is there is no more jumps possible from that square
         # One above that is the piece could make some jumps.
@@ -901,7 +988,7 @@ R N B Q K B N R
             nb.do_jump(jump)  # Execute move
             ctx = new_qctx(jump)
             # Get the new ctx (see if queen jumped diag or straight basically)
-            return nb.square_jumps_recursive(jump_land(jump), ctx)
+            return nb.square_jumps_recursive(jump_land(jump), ctx, False)
             # Check for more jumps this piece can do (so look at where it landed)
             #
 
@@ -921,11 +1008,13 @@ R N B Q K B N R
         return 0 == self.piece_at(square)
 
     def copy(self):
-        return Board(False, self.__str__(), copy=True)
+        b = Board(fen=False, board=self.__str__(), copy=True)
+        b.moves = self.moves
+        return b
 
     def do_jump(self, jump: Jump):
         # assume it is valid
-        # handle en-passant
+        # TODO handle en-passant
         (start, take, land) = jump
         p = self.piece_at(start)
         self.put_at(0, start)
@@ -933,12 +1022,14 @@ R N B Q K B N R
         self.put_at(p, land)
 
     def do_step(self, step: Step) -> None:
+        # TODO handle en-passant
         (start, end) = step
         p: Piece = self.piece_at(square=start)
         self.put_at(p=0, sq=start)
         self.put_at(p, sq=end)
 
     def do_move(self, move: Move) -> None:
+        self.pb = self.copy()
         if self.is_step(move):
             self.do_step(move)
         else:
@@ -953,7 +1044,15 @@ R N B Q K B N R
             self.color *= -1
             self.moves = self.calc_moves(self.color)
         else:
-            print("illegal move")
+            pass
+
+    # unmake a move
+    def pop(self):
+        self.squares = self.pb.squares 
+        self.moves = self.pb.moves 
+        self.color = self.pb.color
+        self.turns = self.pb.turns
+        self.pb = self.pb.pb
 
     def put_at(self, p: Piece, sq: Square):
         r, c = sq
