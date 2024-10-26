@@ -11,6 +11,15 @@ Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 
+transposition_table: dict[int, list[float | Move]] = {}
+
+# for transposition table
+class State:
+    def __init__(self, board: Board, eval, depth: int):
+        self.board = board
+        self.depth = depth
+        self.eval = eval
+
 def map(l, fun, board:board, depth):
     ret = []
     for L in l:
@@ -101,6 +110,13 @@ def alphabeta(board:board, depth:int) -> int | float:
         return sorted(omoves, key=lambda x: x[1])
 
     def abmax(depth: int, alpha: int, beta: int) -> int:
+        state = State(board, evaluate, depth)
+        h = hash(state)
+        if h in transposition_table:
+            return transposition_table[h][0]
+        else:
+            update = True
+
         if depth == 1:
             return evaluate(board)
 
@@ -110,10 +126,10 @@ def alphabeta(board:board, depth:int) -> int | float:
         mvs: list[Move] = []
         for m in M:
            mvs.append(m[0]) 
-
+        
+        bmove: Move = mvs[0]
 
         for move in mvs:
-            # change if needed
             tb.push(move)
             val = abmin(depth - 1, alpha, beta)
 
@@ -121,21 +137,35 @@ def alphabeta(board:board, depth:int) -> int | float:
                 break
             if val > alpha:
                 alpha = val
+                bmove = move
 
-            # change if needed
             tb.pop()
+
+        if update:
+            transposition_table.update({hash(state) : [alpha, bmove]})
         return alpha
 
     def abmin(depth:int, alpha:int, beta:int):
+        state = State(board, evaluate, depth)
+        if hash(state) in transposition_table:
+            return transposition_table[hash(state)][0]
+        else:
+            update = True
+
+
         if depth == 1:
             return evaluate(board)
 
         tb = board.copy()
 
-        moves = order_moves(tb.moves)
+        mvs = order_moves(tb.moves)
+        moves = []
+        for m in mvs:
+            moves.append(m[0])
+        
+        bmove = moves[0]
 
         for move in moves:
-            # change if needed
             tb.push(move)
             val = abmax(depth - 1, alpha, beta)
 
@@ -143,9 +173,13 @@ def alphabeta(board:board, depth:int) -> int | float:
                 break
             if val < beta:
                 beta = val
+                bmove = move
 
-            # change if needed
             tb.pop()
+
+        if update:
+            transposition_table.update({hash(state) : [beta, bmove]})
+
         return beta
 
     # change if needed
@@ -155,11 +189,11 @@ def alphabeta(board:board, depth:int) -> int | float:
         return abmin(depth, float("-inf"), float("inf"))
 
 
-def find_best_move(board:object, depth:int) -> Move:
+def find_best_move(board:object, depth:int) -> list[Move|int]:
     # change if needed
     white = True if board.color == 1 else False
 
     if white:
-        return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])[1]
+        return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
     else:
-        return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])[1]
+        return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])

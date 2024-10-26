@@ -9,6 +9,7 @@ from constants import *
 
 from bot import find_best_move 
 from bot import evaluate 
+from bot import transposition_table
 
 import re
 def is_ucn(move: str) -> bool:
@@ -103,12 +104,18 @@ class Main:
         pygame.display.update()
         while True:
             self.display.draw_board(self.screen)
-            move = self.display.board.from_UCN(input(""))
-            print("MOVE: "+self.display.board.to_UCN(move))
-            self.display.board.push(move)
-            update_display()
+            prompt = input("")
+            if prompt == "transtable":
+                print(transposition_table)
+            else:
+                move = self.display.board.from_UCN(prompt)
+                print("MOVE: "+self.display.board.to_UCN(move))
+                self.display.board.push(move)
+                update_display()
 
-            bot_move = find_best_move(self.display.board, depth=2)
+            eval = find_best_move(self.display.board, depth=2)
+            bot_move = eval[1]
+            bot_score = eval[0]
 
             
             #if self.display.board.is_jump(bot_move):
