@@ -11,6 +11,15 @@ Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 
+transposition_table: dict[int, list[float | Move]] = {}
+
+# for transposition table
+class State:
+    def __init__(self, board: Board, eval, depth: int):
+        self.board = board
+        self.depth = depth
+        self.eval = eval
+
 def map(l, fun, board:board, depth):
     ret = []
     for L in l:
@@ -44,6 +53,21 @@ def sevaluate(board: Board) -> int:
 
     return total
 
+def knight_col_favors(board: Board) -> float:
+    def knight(square:Square) -> float:
+        row, col = square
+        if col/6 > col/3:
+            return 7 + col/6
+        else:
+            return 7 + col/3
+
+    total = 0 
+
+    for row in range(0,8):
+        for col in range(0,8):
+            piece = board.piece_at((row,col))
+            total+=(piece/7)*knight((row,col)) if abs(piece == 2) else total+val_map[piece] 
+    return total
 
 evaluate = sevaluate
 
@@ -72,6 +96,7 @@ def alphabeta(board:board, depth:int) -> int | float:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
         #   other standard move ordering heuristics
+        
 
         #omoves = sorted(moves, key=lambda x: evalmove(x))
         omoves = [[m, 0] for m in moves]
@@ -81,11 +106,17 @@ def alphabeta(board:board, depth:int) -> int | float:
                 mv[1] += 0.85*(evalmove(mv[1])) 
                 start, end = mv[0]
                 mv[1] += 0.2*(1 if abs(board.piece_at(start)) == 2 else 0) 
-                mv[1] += evalmove(mv[0][0])
 
         return sorted(omoves, key=lambda x: x[1])
 
-    def abmax(board: Board, depth: int, alpha: int, beta: int) -> int:
+    def abmax(depth: int, alpha: int, beta: int) -> int:
+        state = State(board, evaluate, depth)
+        h = hash(state)
+        if h in transposition_table:
+            return transposition_table[h][0]
+        else:
+            update = True
+
         if depth == 1:
             return evaluate(board)
 
@@ -95,56 +126,74 @@ def alphabeta(board:board, depth:int) -> int | float:
         mvs: list[Move] = []
         for m in M:
            mvs.append(m[0]) 
-
+        
+        bmove: Move = mvs[0]
 
         for move in mvs:
-            # change if needed
             tb.push(move)
-            val = abmin(board, depth - 1, alpha, beta)
+            val = abmin(depth - 1, alpha, beta)
 
             if val >= beta:
                 break
             if val > alpha:
                 alpha = val
+                bmove = move
 
-            # change if needed
             tb.pop()
+
+        if update:
+            transposition_table.update({hash(state) : [alpha, bmove]})
         return alpha
 
-    def abmin(board, depth, alpha, beta):
+    def abmin(depth:int, alpha:int, beta:int):
+        state = State(board, evaluate, depth)
+        if hash(state) in transposition_table:
+            return transposition_table[hash(state)][0]
+        else:
+            update = True
+
+
         if depth == 1:
             return evaluate(board)
 
         tb = board.copy()
 
-        moves = order_moves(tb.moves)
+        mvs = order_moves(tb.moves)
+        moves = []
+        for m in mvs:
+            moves.append(m[0])
+        
+        bmove = moves[0]
 
         for move in moves:
-            # change if needed
             tb.push(move)
-            val = abmax(board, depth - 1, alpha, beta)
+            val = abmax(depth - 1, alpha, beta)
 
             if val <= alpha:
                 break
             if val < beta:
                 beta = val
+                bmove = move
 
-            # change if needed
             tb.pop()
+
+        if update:
+            transposition_table.update({hash(state) : [beta, bmove]})
+
         return beta
 
     # change if needed
     if board.color == 1:
-        return abmax(board, depth, float("-inf"), float("inf"))
+        return abmax(depth, float("-inf"), float("inf"))
     else:
-        return abmin(board, depth, float("-inf"), float("inf"))
+        return abmin(depth, float("-inf"), float("inf"))
 
 
-def find_best_move(board:object, depth:int) -> Move:
+def find_best_move(board:object, depth:int) -> list[Move|int]:
     # change if needed
     white = True if board.color == 1 else False
 
     if white:
-        return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])[1]
+        return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
     else:
-        return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])[1]
+        return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])

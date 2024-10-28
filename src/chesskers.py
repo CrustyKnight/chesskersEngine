@@ -568,7 +568,7 @@ R N B Q K B N R
         return res
 
     # Universal Chesskers Notation
-    def from_(self, move: str) -> Move:
+    def from_UCN(self, move: str) -> Move:
         # for e4e5 and cases like that
         def parse_step(move: str) -> Step:
             start = move[:2]
