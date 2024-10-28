@@ -16,6 +16,8 @@ QueenContext: TypeAlias = None | Literal["diag", "straight"]
 # YAY
 
 
+# NOTE: we need to implement promotion as well.
+
 # For tracking en-passant:
 # One way is to create a type of phantom piece that is created whenever a pawn moves 2 spaces, and deleted on all other moves.
 # Might be a bit inefficent if you have to scan the board for the phantom piece after every full move.
@@ -85,7 +87,7 @@ R N B Q K B N R
         if not copy:
             self.moves = self.calc_moves(self.color)
 
-        self.pb:None|Board = None
+        self.pb: None | Board = None
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
@@ -566,7 +568,7 @@ R N B Q K B N R
         return res
 
     # Universal Chesskers Notation
-    def from_ (self, move: str) -> Move:
+    def from_(self, move: str) -> Move:
         # for e4e5 and cases like that
         def parse_step(move: str) -> Step:
             start = move[:2]
@@ -738,8 +740,6 @@ R N B Q K B N R
         # maybe later it will just become a number (if efficiency matters a lot)
         # start is if this is the first jump. (for bishops and stuff)
         def direxp(direction: Direction) -> Square:
-            # TODO mod this to give the location of the piece it hits, not all the squares before
-            # and give nothing if it hits the edge
             sq = add_sq_dir(square, direction)
             while in_bounds(sq) and self.empty(sq):
                 sq = add_sq_dir(sq, direction)
@@ -772,19 +772,19 @@ R N B Q K B N R
         def edge_effects(
             taken: Square,
             land: Square,
-        ) -> tuple[Square, Square] | None:  # taken is the square of the taken piece
-            # checking if the piece is taking over a ROW edge (Square objects are tuples of (row, col), as a reminder)
-            # *** This method executes edge effects for jumps if they're necessary and/or possible***
-            # *** This method returns the tuple of the taking then destination square IF the destination square is 'off' the edge
-            # first element in tuple = square on which piece is being taken; second element in tuple = final destination of square
-            # Reminder: square = starting square as a tuple of (row, col)
-            #
+        ) -> tuple[Square, Square] | None:
+            """Given a (taken,land) pair, transform it so it jumps over the edge of the board if necessary.
+
+            This function also makes sure jumps don't land on other pieces.
+
+            If the pair is not a valid move return none.
+            If the pair is a valid move that won't go out of bounds, return it unchanged.
+            """
+            # taken is the square of the taken piece
+            # land is the square the piece lands on
             # edge effects both ensures that moves are made within bounds, and that jumps don't land ontop of pieces
             piece = self.piece_at(square)
-            # taken_piece = self.piece_at(taken)
-            # First thing: making sure that the piece exists, is taking a piece, and is moving to an empty destination square
-            # assert piece != 0 and taken_piece != 0 and self.empty(land)
-            # check. Is the landing square in bounds? (if so, just return what we got)
+            # check. Is the landing square in bounds? (if so, just return what we got if its landing on empty, None otherwise)
             if in_bounds(land):
                 if self.empty(land):
                     return (taken, land)
@@ -793,8 +793,11 @@ R N B Q K B N R
 
             # its not in bounds. time to rectify it
             land_row, land_col = land
-            rectifier = {7: -1, 8: 0}
-            if 0 <= land_col >= 7:
+            # used to be {7: -1, 8: 0}. This feels wrong, so testing a fix here
+            rectifier = {-1: 7, 8: 0}
+            # used to be 0 <= land_col >= 7. That feels wrong, so testing a fix here
+            # if land col not in range(0,8), aka if land_col <= 0 && land_col >= 7
+            if land_col not in range(0, 8):  # [0..7]
                 land_col = rectifier[land_col]
 
             if piece > 0:  # color is white
@@ -1048,8 +1051,8 @@ R N B Q K B N R
     # unmake a move
     def pop(self):
         if self.pb != None:
-            self.squares = self.pb.squares 
-            self.moves = self.pb.moves 
+            self.squares = self.pb.squares
+            self.moves = self.pb.moves
             self.color = self.pb.color
             self.turns = self.pb.turns
             self.pb = self.pb.pb
