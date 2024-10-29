@@ -8,7 +8,7 @@ from display import Display
 from constants import *
 
 from bot import find_best_move 
-from bot import evaluate 
+from bot import alphabeta
 from bot import transposition_table
 
 import re
@@ -113,10 +113,8 @@ class Main:
                 self.display.board.push(move)
                 update_display()
 
-            eval = find_best_move(self.display.board, depth=2)
-            bot_move = eval[1]
-            bot_score = eval[0]
-
+            eval = find_best_move(self.display.board, depth=1)
+            bot_move, bot_score = eval
             
             #if self.display.board.is_jump(bot_move):
             if self.display.board.is_jump(bot_move):
@@ -132,7 +130,7 @@ class Main:
             else:
                 self.display.board.push(bot_move)
             print("BOT MOVE: "+self.display.board.to_UCN(bot_move))
-            print("BOT EVALUATION: "+str(evaluate(self.display.board)))
+            print("BOT EVALUATION: "+str(bot_score))
             update_display()
             print(self.display.board)
 
@@ -140,6 +138,7 @@ class Main:
                 print("GAME IS OVER")
                 break
             
+
 
 def script() -> str:
         text = input("Please enter a number between 1 and 10")
