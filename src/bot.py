@@ -91,23 +91,20 @@ def alphabeta(board:board, depth:int) -> int | float:
         return evaluate(tb)
 
     # not here for now but later move ordering algorithms will use board
-    def order_moves(moves:list[Move]):
+    def order_moves(moves: list[Move]):
         # Some heuristic ideas:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
         #   other standard move ordering heuristics
-        
+        def estimate_move(mv: Move) -> float:
+            val = 0
+            if board.is_step(mv):
+                val += 0.85 * (evalmove(mv))
+                start, end = mv
+                val += 0.2 * (1 if abs(board.piece_at(start)) == 2 else 0)
+            return val
 
-        #omoves = sorted(moves, key=lambda x: evalmove(x))
-        omoves = [[m, 0] for m in moves]
-
-        for mv in omoves:
-            if board.is_step(mv[0]):
-                mv[1] += 0.85*(evalmove(mv[1])) 
-                start, end = mv[0]
-                mv[1] += 0.2*(1 if abs(board.piece_at(start)) == 2 else 0) 
-
-        return sorted(omoves, key=lambda x: x[1])
+        return sorted(moves, key=lambda x: estimate_move(x))
 
     def abmax(depth: int, alpha: int, beta: int) -> int:
         state = State(board, evaluate, depth)
@@ -122,11 +119,8 @@ def alphabeta(board:board, depth:int) -> int | float:
 
         tb = board.copy()
 
-        M = order_moves(tb.moves)
-        mvs: list[Move] = []
-        for m in M:
-           mvs.append(m[0]) 
-        
+        mvs: list[Move] = order_moves(tb.moves)
+
         bmove: Move = mvs[0]
 
         for move in mvs:
@@ -152,17 +146,13 @@ def alphabeta(board:board, depth:int) -> int | float:
         else:
             update = True
 
-
         if depth == 1:
             return evaluate(board)
 
         tb = board.copy()
 
-        mvs = order_moves(tb.moves)
-        moves = []
-        for m in mvs:
-            moves.append(m[0])
-        
+        moves = order_moves(tb.moves)
+
         bmove = moves[0]
 
         for move in moves:
