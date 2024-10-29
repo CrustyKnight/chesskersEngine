@@ -1033,7 +1033,6 @@ R N B Q K B N R
         self.put_at(p, sq=end)
 
     def do_move(self, move: Move) -> None:
-        self.pb = self.copy()
         if self.is_step(move):
             self.do_step(move)
         else:
@@ -1043,6 +1042,7 @@ R N B Q K B N R
     # how we add a move to the board
     def push(self, move: Move) -> None:
         if move in self.moves:
+            self.pb = self.copy()
             self.do_move(move)
             self.turns += 1
             self.color *= -1

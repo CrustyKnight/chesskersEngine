@@ -93,6 +93,7 @@ class Config:  # Combines themes and sounds into Config objects.
         )
         self.themes = [green, blue, brown, gray]
 
+
 # Dragger objects help outline how far classes will go
 # TODO: turn Dragger to have a self and square argument and NO self.piece
 class Dragger:
@@ -107,15 +108,15 @@ class Dragger:
 
     def update_blit(self, surface):
         # texture
-            # self.piece.set_texture(size=128)
-            # texture = self.piece.texture
+        # self.piece.set_texture(size=128)
+        # texture = self.piece.texture
         # image
-            # img = pygame.image.load(texture)
+        # img = pygame.image.load(texture)
         # rectangle
         img_center = (self.mouseX, self.mouseY)
-            # self.piece.texture_rect = img.get_rect(center=img_center)
+        # self.piece.texture_rect = img.get_rect(center=img_center)
         # update blit
-            # surface.blit(img, self.piece.texture_rect)
+        # surface.blit(img, self.piece.texture_rect)
 
     # Other methods (storing updated positions & actually doing the dragging)
 
@@ -125,6 +126,7 @@ class Dragger:
     def save_initial(self, pos):
         self.initial_row = pos[1] // SQSIZE
         self.initial_col = pos[0] // SQSIZE
+
 
 class Display:  # The main class behind this file.
     def __init__(self, surface):
@@ -142,7 +144,7 @@ class Display:  # The main class behind this file.
         self.config = Config()
         self.squares = self.draw_squares(surface)
 
-    #Yay
+    # Yay
     def draw_squares(self, surface):
         def get_alphacol(col):
             ALPHACOLS = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"}
@@ -180,10 +182,12 @@ class Display:  # The main class behind this file.
         pygame.draw.rect(surface, (255, 255, 255), new_rect)
 
     # TODO: Fix pieces to ensure that they reflect numberboard.
-    def create_texture(self, color, name, size=80) -> str:  # takes in string arguments of piece color and piece name, 
-                                               # returns images from assets folder.
-            return os.path.join(f"assets/images/imgs-{size}px/{color}_{name}.png")
-    
+    def create_texture(
+        self, color, name, size=80
+    ) -> str:  # takes in string arguments of piece color and piece name,
+        # returns images from assets folder.
+        return os.path.join(f"assets/images/imgs-{size}px/{color}_{name}.png")
+
     def show_pieces(self, surface) -> None:
         for row in range(ROWS):
             for col in range(COLS):
@@ -215,7 +219,7 @@ class Display:  # The main class behind this file.
         self.draw_board(surface)
 
     def draw_board(self, surface) -> None:
-        empty = (255, 255, 255) #The last 0 indicates 0 alpha, a transparent color
+        empty = (255, 255, 255)  # The last 0 indicates 0 alpha, a transparent color
         surface.fill(empty)
         self.draw_squares(surface)
         self.show_pieces(surface)

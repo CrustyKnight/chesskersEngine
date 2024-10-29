@@ -1,4 +1,4 @@
-#Board size constants
+# Board size constants
 WIDTH = 800
 HEIGHT = 800
 
