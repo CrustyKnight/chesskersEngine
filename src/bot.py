@@ -11,7 +11,8 @@ Jump: TypeAlias = tuple[Square, Square, Square]
 JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 
-transposition_table: dict[int, list[float | Move]] = {}
+transposition_table: dict[int, tuple[float, Move]] = {}
+
 
 # for transposition table
 class State:
@@ -136,7 +137,7 @@ def alphabeta(board:board, depth:int) -> int | float:
             tb.pop()
 
         if update:
-            transposition_table.update({hash(state) : [alpha, bmove]})
+            transposition_table.update({hash(state): (alpha, bmove)})
         return alpha
 
     def abmin(depth:int, alpha:int, beta:int):
@@ -168,7 +169,7 @@ def alphabeta(board:board, depth:int) -> int | float:
             tb.pop()
 
         if update:
-            transposition_table.update({hash(state) : [beta, bmove]})
+            transposition_table.update({hash(state): (beta, bmove)})
 
         return beta
 
