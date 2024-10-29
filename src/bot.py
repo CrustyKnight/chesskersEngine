@@ -1,7 +1,7 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
 # Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn! # He actually plays well lol.
 from time import sleep
-from typing import TypeAlias
+from typing import TypeAlias, Callable
 from chesskers import Board
 
 board: TypeAlias = Board
@@ -17,10 +17,12 @@ transposition_table: dict[int, tuple[float, Move]] = {}
 
 # for transposition table
 class State:
-    def __init__(self, board: Board, eval, depth: int):
+    def __init__(
+        self, board: Board, evaluation: Callable[[Board], int | float], depth: int
+    ):
         self.board = board
         self.depth = depth
-        self.eval = eval
+        self.eval = evaluation
 
 
 val_map = {
@@ -147,46 +149,27 @@ def alphabeta(board: board, depth: int) -> int | float:
                 val += 0.2 * (1 if abs(board.piece_at(start)) == 2 else 0)
             return val
 
-        return sorted(moves, key=lambda x: estimate_move(x))
+        return moves
+        # return sorted(moves, key=lambda x: estimate_move(x))
 
     def abmax(b: Board, depth: int, alpha: int, beta: int) -> int:
-        # state = State(board, evaluate, depth)
-        # h = hash(state)
-        # if h in transposition_table:
-        #    return transposition_table[h][0]
-        # else:
-        # update = True
-
         if depth == 1:
             return evaluate(board)
-
-        mvs: list[Move] = order_moves(board.moves)
-
-        for move in mvs:
+        moves: list[Move] = order_moves(board.moves)
+        for move in moves:
             tb = b.copy()
             tb.push(move)
             val = abmin(tb, depth - 1, alpha, beta)
-
             if val >= beta:
                 return beta
             if val > alpha:
                 alpha = val
-
-        # if update:
-        #    transposition_table.update({hash(state) : [alpha, bmove]})
         return alpha
 
-    def abmin(b: Board, depth: int, alpha: int, beta: int):
-        # state = State(board, evaluate, depth)
-        # if hash(state) in transposition_table:
-        #    return transposition_table[hash(state)][0]
-        # else:
-        #    update = True
+    def abmin(b: Board, depth: int, alpha: int, beta: int) -> int:
         if depth == 1:
             return evaluate(board)
-
-        moves = order_moves(board.moves)
-
+        moves: list[Move] = order_moves(board.moves)
         for move in moves:
             tb = b.copy()
             tb.push(move)
@@ -195,9 +178,6 @@ def alphabeta(board: board, depth: int) -> int | float:
                 return alpha
             if val < beta:
                 beta = val
-
-        # if update:
-        #    transposition_table.update({hash(state) : [beta, bmove]})
         return beta
 
     if board.color == 1:
