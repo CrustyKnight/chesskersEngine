@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Literal, TypeAlias
+from typing import Literal, TypeAlias, TypeGuard
 
 
 Direction: TypeAlias = tuple[int, int]
@@ -83,7 +83,7 @@ R N B Q K B N R
         #         """)
         self.turns = 0
         self.color = 1 if self.turns % 2 == 0 else -1
-        self.moves = []
+        self.moves: list[Move] = []
         if not copy:
             self.moves = self.calc_moves(self.color)
 
@@ -511,13 +511,15 @@ R N B Q K B N R
         ]
         return possible_functions[abs(piece)]
 
-    def is_step(self, move: Move) -> bool:
+    # TypeGuard[Step] return type lets the static type checker know that if this method returns true, the input is of type Step
+    def is_step(self, move: Move) -> TypeGuard[Step]:
         if len(move[0]) == 2:
             return True
 
         return False
 
-    def is_jump(self, move: Move) -> bool:
+    # TypeGuard[Step] return type lets the static type checker know that if this method returns true, the input is of type Jump
+    def is_jump(self, move: Move) -> TypeGuard[Jump]:
         if len(move[0]) == 3:
             return True
 
