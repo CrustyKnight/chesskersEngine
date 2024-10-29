@@ -1,5 +1,5 @@
 # I like having this as a separate file, it's still integrated in chesskers.py tho
-# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn! # He actually plays well lol. 
+# Welcome to the world EDWARD! - EDWARD! Doesn't Work All Right, Damn! # He actually plays well lol.
 from time import sleep
 from typing import TypeAlias
 from chesskers import Board
@@ -13,6 +13,7 @@ JumpMove: TypeAlias = list[Jump]
 Move: TypeAlias = JumpMove | Step
 
 transposition_table: dict[int, list[float | Move]] = {}
+
 
 # for transposition table
 class State:
@@ -35,7 +36,7 @@ val_map = {
     -4: -5,
     -3: -4,
     -2: -7,
-    -1: -1
+    -1: -1,
 }
 
 
@@ -48,26 +49,32 @@ def sevaluate(board: Board) -> int:
 
     return total
 
+
 def knight_col_favors(board: Board) -> float:
-    def knight(square:Square) -> float:
+    def knight(square: Square) -> float:
         row, col = square
-        if col/6 > col/3:
-            return 7 + col/6
+        if col / 6 > col / 3:
+            return 7 + col / 6
         else:
-            return 7 + col/3
+            return 7 + col / 3
 
-    total = 0 
+    total = 0
 
-    for row in range(0,8):
-        for col in range(0,8):
-            piece = board.piece_at((row,col))
-            total+=(piece/7)*knight((row,col)) if abs(piece == 2) else total+val_map[piece] 
+    for row in range(0, 8):
+        for col in range(0, 8):
+            piece = board.piece_at((row, col))
+            total += (
+                (piece / 7) * knight((row, col))
+                if abs(piece == 2)
+                else total + val_map[piece]
+            )
     return total
+
 
 evaluate = sevaluate
 
 
-def evaluate_move(move: Move, board: Board, depth:int):
+def evaluate_move(move: Move, board: Board, depth: int):
     # change if needed
     tb = board.copy()
     tb.push(move)
@@ -75,9 +82,10 @@ def evaluate_move(move: Move, board: Board, depth:int):
     score = alphabeta(tb, depth)
     print("SCORE OF " + board.to_UCN(move) + ": " + str(score))
     print(tb)
-    #sleep(2)
+    # sleep(2)
     print("\n\n")
     return score
+
 
 def test_depth_2(board: Board):
     val = 0
@@ -115,7 +123,8 @@ def test_depth_2(board: Board):
 
     return val
 
-def alphabeta(board:board, depth:int) -> int | float:
+
+def alphabeta(board: board, depth: int) -> int | float:
 
     def evalmove(move: Move) -> int | float:
         # change if needed
@@ -125,31 +134,30 @@ def alphabeta(board:board, depth:int) -> int | float:
         return evaluate(tb)
 
     # not here for now but later move ordering algorithms will use board
-    def order_moves(moves:list[Move]):
+    def order_moves(moves: list[Move]):
         # Some heuristic ideas:
         #   "decapitate" : only evalute head of move
         #   "nFav" : knights are pushed to the front
         #   other standard move ordering heuristics
-        
 
-        #omoves = sorted(moves, key=lambda x: evalmove(x))
+        # omoves = sorted(moves, key=lambda x: evalmove(x))
         omoves = [[m, 0] for m in moves]
 
         for mv in omoves:
             if board.is_step(mv[0]):
-                mv[1] += 0.85*(evalmove(mv[1])) 
+                mv[1] += 0.85 * (evalmove(mv[1]))
                 start, end = mv[0]
-                mv[1] += 0.2*(1 if abs(board.piece_at(start)) == 2 else 0) 
+                mv[1] += 0.2 * (1 if abs(board.piece_at(start)) == 2 else 0)
 
         return sorted(omoves, key=lambda x: x[1])
 
-    def abmax(b:Board, depth: int, alpha: int, beta: int) -> int:
-        #state = State(board, evaluate, depth)
-        #h = hash(state)
-        #if h in transposition_table:
+    def abmax(b: Board, depth: int, alpha: int, beta: int) -> int:
+        # state = State(board, evaluate, depth)
+        # h = hash(state)
+        # if h in transposition_table:
         #    return transposition_table[h][0]
-        #else:
-            #update = True
+        # else:
+        # update = True
 
         if depth == 1:
             return evaluate(board)
@@ -157,7 +165,7 @@ def alphabeta(board:board, depth:int) -> int | float:
         M = order_moves(board.moves)
         mvs: list[Move] = []
         for m in M:
-           mvs.append(m[0]) 
+            mvs.append(m[0])
 
         for move in mvs:
             tb = b.copy()
@@ -169,16 +177,15 @@ def alphabeta(board:board, depth:int) -> int | float:
             if val > alpha:
                 alpha = val
 
-        #if update:
+        # if update:
         #    transposition_table.update({hash(state) : [alpha, bmove]})
         return alpha
 
-
-    def abmin(b:Board, depth:int, alpha:int, beta:int):
-        #state = State(board, evaluate, depth)
-        #if hash(state) in transposition_table:
+    def abmin(b: Board, depth: int, alpha: int, beta: int):
+        # state = State(board, evaluate, depth)
+        # if hash(state) in transposition_table:
         #    return transposition_table[hash(state)][0]
-        #else:
+        # else:
         #    update = True
         if depth == 1:
             return evaluate(board)
@@ -197,7 +204,7 @@ def alphabeta(board:board, depth:int) -> int | float:
             if val < beta:
                 beta = val
 
-        #if update:
+        # if update:
         #    transposition_table.update({hash(state) : [beta, bmove]})
         return beta
 
@@ -207,30 +214,30 @@ def alphabeta(board:board, depth:int) -> int | float:
         return abmin(board, depth, float("-inf"), float("inf"))
 
 
-def find_best_move(board:Board, depth:int) -> tuple[Move, int|float]:
+def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
     # change if needed
     white = True if board.color == 1 else False
 
     if white:
-        #return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
+        # return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
         evals: list[int] = []
         max = float("-inf")
         bmove = board.moves[0]
         for move in board.moves:
-           evals.append(alphabeta(board, depth)) 
+            evals.append(alphabeta(board, depth))
 
         for i in range(0, len(evals)):
             eval = evals[i]
             if eval >= max:
-                max = eval 
+                max = eval
                 bmove = board.moves[i]
                 print(board.to_UCN(bmove))
-                #sleep(1)
+                # sleep(1)
 
         return (bmove, max)
 
     else:
-        #return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
+        # return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
         evals: list[int] = []
         max = float("inf")
         bmove = board.moves[0]

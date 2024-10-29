@@ -85,7 +85,7 @@ R N B Q K B N R
         if not copy:
             self.moves = self.calc_moves(self.color)
 
-        self.pb:None|Board = None
+        self.pb: None | Board = None
 
     def from_fen_string(self, string: str) -> list[list[Piece]]:
         pass
@@ -566,7 +566,7 @@ R N B Q K B N R
         return res
 
     # Universal Chesskers Notation
-    def from_UCN (self, move: str) -> Move:
+    def from_UCN(self, move: str) -> Move:
         # for e4e5 and cases like that
         def parse_step(move: str) -> Step:
             start = move[:2]
@@ -1037,7 +1037,7 @@ R N B Q K B N R
     # how we add a move to the board
     def push(self, move: Move) -> None:
         if move in self.moves:
-            self.pb = self.copy() 
+            self.pb = self.copy()
             self.do_move(move)
             self.turns += 1
             self.color *= -1
@@ -1048,8 +1048,8 @@ R N B Q K B N R
     # unmake a move
     def pop(self):
         if self.pb != None:
-            self.squares = self.pb.squares 
-            self.moves = self.pb.moves 
+            self.squares = self.pb.squares
+            self.moves = self.pb.moves
             self.color = self.pb.color
             self.turns = self.pb.turns
             self.pb = self.pb.pb
