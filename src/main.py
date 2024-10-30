@@ -28,12 +28,6 @@ class Main:
         print(self.board.squares)
         self.turns_played = 0
 
-    def __step__(self, surface, start: Square):
-        pass
-
-    def __jump__(self, surface, start: Square):
-        pass
-
     # This method needs to execute the user's move on the screen.
     def __move__(
         self, surface
@@ -42,46 +36,22 @@ class Main:
         user_UCN = input(
             "Where would you like to move this piece? Enter your move in UCN Enter 'no' if you don't want to move it.\n"
         )
-        # Checking that the user did enter UCN
-        if not is_ucn(user_UCN):
-            return print("Please give a valid UCN next time!")
-        # col_dict to use to convert UCN purely into useful numbers
-        col_dict = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
-
-        # Using UCN properties to determine starting and ending row(s) and column(s) of the move
-        # First character of UCN = letter for first column of piece as shown by col_dict above
-        # Second character of UCN = number (in string form) for first row of piece
-        # Second to last character of UCN = letter for final column of piece as shown by col_dict above
-        # Last character of UCN = number (in string form) for final row of piece
-        start_row = ROWS - int(user_UCN[1])
-        start_col = col_dict[user_UCN[0]]
-        final_row = ROWS - int(user_UCN[len(user_UCN) - 1])
-        final_col = col_dict[user_UCN[len(user_UCN) - 2]]
-
-        # Getting squares into tuples to enter into check_valid_step and check_valid_jump methods
-        start: Square = (start_row, start_col)
-        final: Square = (final_row, final_col)
-        piece: int = self.board.piece_at(start)
-
-        if user_UCN.__contains__("t"):
-            taken_row = ROWS - int(user_UCN[3])
-            taken_col = col_dict[user_UCN[2]]
-            taken: Square = (taken_row, taken_col)
-            is_valid_move = self.board.check_valid_jump(start, taken, final)
+        move = self.display.board.from_UCN(user_UCN)
+        print("MOVE: " + self.display.board.to_UCN(move))
+        if move == None or (self.board.color == 1 and self.turns_played %2 == 1) or (self.board.color == 0 and self.turns_played %2 == 0):
+            return "Invalid move"
+        if self.board.is_jump(move):
+            for m in move:
+                self.display.board.do_jump(m)
+                self.display.draw_board(self.screen)
+                pygame.display.update()
+                sleep(0.5)
         else:
-            is_valid_move = self.board.check_valid_step(start, final)
-
-        if not is_valid_move:
-            return None
-
-        # Now that the move has been confirmed to be valid up to this point, the move itself is executed on the GUI board
-        self.board.squares[start_row][start_col] = 0
-        self.board.squares[final_row][final_col] = piece
-        self.display.draw_board(surface)
-
-        # Using check_valid_step() and check_valid_jump() to ensure that user has entered a valid move w/o using live move generation
-        # This is done to prevent lagging (we know live move generation and comparing every possible move with the board )
-        return print("yay")
+            self.display.board.push(move)
+            self.display.draw_board(surface)
+        self.turns_played += 1
+        pygame.display.update()
+        return None
 
     def main_loop(self):
         _ = pygame.init()
@@ -155,4 +125,4 @@ def script() -> str:
 # Yay
 
 main = Main()
-main.pve()
+main.main_loop()
