@@ -174,6 +174,35 @@ R N B Q K B N R
             print("")
             y += 1
 
+    def print_after(self, output: list[str], guides: bool = False, sep: str = "\t"):
+
+        out_row = 0
+
+        for i in range(0, len(output)):
+            output[i] += sep
+
+        def to_ascii(piece: Piece) -> str:
+            return [".", "P", "N", "B", "R", "Q", "K", "k", "q", "r", "b", "n", "p"][
+                piece
+            ]
+
+        rows = ["8", "7", "6", "5", "4", "3", "2", "1"]
+        cols_header = ["  a b c d e f g h", " +----------------"]
+
+        y = 0
+        if guides:
+            output[out_row] += cols_header[0]
+            out_row += 1
+            output[out_row] += cols_header[1]
+            out_row += 1
+        for row in self.squares:
+            if guides:
+                output[out_row] += rows[y] + "|"
+            for piece in row:
+                output[out_row] += to_ascii(piece) + " "
+            out_row += 1
+            y += 1
+
     def piece_at(self, square: Square) -> Piece:
         (row, col) = square
         # Useless if statement?
@@ -1013,6 +1042,7 @@ R N B Q K B N R
 
     def copy(self):
         b = Board(fen=False, board=self.__str__(), copy=True)
+        b.color = self.color
         b.moves = self.moves
         return b
 
