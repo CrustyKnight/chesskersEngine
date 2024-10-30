@@ -152,26 +152,30 @@ def alphabeta(board: board, depth: int) -> int | float:
         return moves
         # return sorted(moves, key=lambda x: estimate_move(x))
 
-    def abmax(b: Board, depth: int, alpha: int, beta: int) -> int:
+    def abmax(board: Board, depth: int, alpha: int, beta: int) -> int:
+        print("Trying at depth: " + str(depth))
         if depth == 1:
             return evaluate(board)
         moves: list[Move] = order_moves(board.moves)
         for move in moves:
-            tb = b.copy()
+            tb = board.copy()
             tb.push(move)
+            print("I'm searching board:")
+            tb.print()
             val = abmin(tb, depth - 1, alpha, beta)
+            print("its value is: " + str(val))
             if val >= beta:
                 return beta
             if val > alpha:
                 alpha = val
         return alpha
 
-    def abmin(b: Board, depth: int, alpha: int, beta: int) -> int:
+    def abmin(board: Board, depth: int, alpha: int, beta: int) -> int:
         if depth == 1:
             return evaluate(board)
         moves: list[Move] = order_moves(board.moves)
         for move in moves:
-            tb = b.copy()
+            tb = board.copy()
             tb.push(move)
             val = abmax(tb, depth - 1, alpha, beta)
             if val <= alpha:
