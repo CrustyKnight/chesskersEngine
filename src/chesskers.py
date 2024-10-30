@@ -51,7 +51,7 @@ class Board:
     def __init__(
         self,
         fen: bool = False,
-        board: str = """other info for the board state (en-passant, etc.)
+        board: str = """C,C,None,0,1
 r n b q k b n r
 p p p p p p p p
 . . . . . . . .
@@ -81,8 +81,7 @@ R N B Q K B N R
         # P P P P P P P P
         # R N B Q K B N R
         #         """)
-        self.turns = 0
-        self.color = 1 if self.turns % 2 == 0 else -1
+
         self.moves: list[Move] = []
         if not copy:
             self.moves = self.calc_moves(self.color)
@@ -120,6 +119,9 @@ R N B Q K B N R
         #   R'C' square is the one the pawn that will be removed is
         # tn is an int representing turn number (even numbers mean its blacks turn, odd means its whites)
         #   starts at 1
+        data = data_line.split(",")
+        self.turns = int(data[3])
+        self.color = int(data[4])
         string = string.split("\n", 1)[1]
         for token in string.split():
             x = counter % 8
@@ -145,7 +147,8 @@ R N B Q K B N R
             -1: "p",
         }
 
-        ret = "data_line\n"
+        data_line = "C,C,None," + str(self.turns) + "," + str(self.color)
+        ret = data_line + "\n"
 
         for row in self.squares:
             for piece in row:
