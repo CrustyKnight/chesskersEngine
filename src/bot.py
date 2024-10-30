@@ -126,9 +126,9 @@ def test_depth_2(board: Board):
     return val
 
 
-def alphabeta(board: board, depth: int) -> int | float:
+def alphabeta(board: board, depth: int) -> float:
 
-    def evalmove(move: Move) -> int | float:
+    def evalmove(move: Move) -> float:
         # change if needed
         tb = board.copy()
         tb.push(move)
@@ -152,7 +152,7 @@ def alphabeta(board: board, depth: int) -> int | float:
         return moves
         # return sorted(moves, key=lambda x: estimate_move(x))
 
-    def abmax(board: Board, depth: int, alpha: int, beta: int) -> int:
+    def abmax(board: Board, depth: int, alpha: float, beta: float) -> float:
         print("Trying at depth: " + str(depth))
         if depth == 1:
             return evaluate(board)
@@ -170,7 +170,7 @@ def alphabeta(board: board, depth: int) -> int | float:
                 alpha = val
         return alpha
 
-    def abmin(board: Board, depth: int, alpha: int, beta: int) -> int:
+    def abmin(board: Board, depth: int, alpha: float, beta: float) -> float:
         if depth == 1:
             return evaluate(board)
         moves: list[Move] = order_moves(board.moves)
@@ -196,7 +196,7 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
 
     if white:
         # return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
-        evals: list[int] = []
+        evals: list[float] = []
         max = float("-inf")
         bmove = board.moves[0]
         for move in board.moves:
@@ -214,7 +214,7 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
 
     else:
         # return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
-        evals: list[int] = []
+        evals: list[float] = []
         max = float("inf")
         bmove = board.moves[0]
         for move in board.moves:
