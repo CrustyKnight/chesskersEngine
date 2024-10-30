@@ -82,48 +82,7 @@ def evaluate_move(move: Move, board: Board, depth: int):
     tb.push(move)
 
     score = alphabeta(tb, depth)
-    print("SCORE OF " + board.to_UCN(move) + ": " + str(score))
-    print(tb)
-    # sleep(2)
-    print("\n\n")
     return score
-
-
-def test_depth_2(board: Board):
-    val = 0
-    if board.color == 1:
-        val = float("-inf")
-        for move in board.moves:
-            tb = board.copy()
-            tb.push(move)
-            min = float("inf")
-            for m in tb.moves:
-                tb.push(m)
-                v = evaluate(tb)
-                if v <= min:
-                    min = v
-
-            v = min
-            if v >= val:
-                val = v
-
-    else:
-        val = float("inf")
-        for move in board.moves:
-            tb = board.copy()
-            tb.push(move)
-            min = float("-inf")
-            for m in tb.moves:
-                tb.push(m)
-                v = evaluate(tb)
-                if v >= min:
-                    min = v
-
-            v = min
-            if v <= val:
-                val = v
-
-    return val
 
 
 board_stack: list[list[str]] = []
@@ -135,7 +94,6 @@ def print_board_stack(start: str = ""):
         for b in range(len(board_stack)):
             row += board_stack[b][r] + "\t"
         print(row)
-    pass
 
 
 def alphabeta(board: board, depth: int) -> float:
@@ -163,8 +121,8 @@ def alphabeta(board: board, depth: int) -> float:
 
         return sorted(moves, key=lambda x: estimate_move(x))
 
-    def abmax(board: Board, depth: int, alpha: float, beta: float) -> float:
-        # print("Trying at depth: " + str(depth))
+    def abmax(board: Board, depth: int, alpha: int, beta: int) -> float:
+        print("Trying at depth: " + str(depth))
         if depth == 1:
             return evaluate(board)
         moves: list[Move] = order_moves(board.moves)
@@ -175,10 +133,10 @@ def alphabeta(board: board, depth: int) -> float:
             tb.print_after(b_rep, False, "")
             board_stack.append(b_rep)
             print_start_str = "\t" * (len(board_stack) - 1)
-            print(print_start_str + "[ABMAX] I'm searching board:")
-            print_board_stack(print_start_str)
+            # print(print_start_str + "[ABMAX] I'm searching board:")
+            print_board_stack("")
             val = abmin(tb, depth - 1, alpha, beta)
-            print(print_start_str + "[ABMAX] its value is: " + str(val))
+            # print(print_start_str + "[ABMAX] its value is: " + str(val))
             _ = board_stack.pop()
             if val >= beta:
                 return beta
@@ -197,10 +155,10 @@ def alphabeta(board: board, depth: int) -> float:
             tb.print_after(b_rep, False, "")
             board_stack.append(b_rep)
             print_start_str = "\t" * (len(board_stack) - 1)
-            print(print_start_str + "[ABMIN] I'm searching board:")
-            print_board_stack(print_start_str)
+            # print(print_start_str + "[ABMIN] I'm searching board:")
+            print_board_stack("")
             val = abmax(tb, depth - 1, alpha, beta)
-            print(print_start_str + "[ABMIN] its value is: " + str(val))
+            # print(print_start_str + "[ABMIN] its value is: " + str(val))
             _ = board_stack.pop()
             if val <= alpha:
                 return alpha
@@ -220,36 +178,33 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
 
     # evals: list[float] = []
     if white:
+        maxi = float("-inf")
         # return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
         #
         #
         # return max(board.moves, key=lambda m: evaluate_move(m, board, depth))
         max = float("-inf")
         bmove = board.moves[0]
-        # for move in board.moves:
-        #     evals.append(evaluate_move(move, board, depth))
-        evals = [evaluate_move(move, board, depth) for move in board.moves]
-
+        evals = [evaluate_move(m, board, depth) for m in board.moves]
         for i in range(0, len(evals)):
-            eval = evals[i]
-            if eval >= max:
-                max = eval
+            evaluation = evals[i]
+            if evaluation >= maxi:
+                maix = evaluation
                 bmove = board.moves[i]
-
-        return (bmove, max)
+        return (bmove, maxi)
 
     else:
-        # return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
-        min = float("inf")
+        mini = float("inf")
         bmove = board.moves[0]
         # for move in board.moves:
         #     evals.append(evaluate_move(move, board, depth))
         evals = [evaluate_move(move, board, depth) for move in board.moves]
 
+        evals = [evaluate_move(m, board, depth) for m in board.moves]
         for i in range(0, len(evals)):
-            eval = evals[i]
-            if eval <= min:
-                min = eval
+            evaluation = evals[i]
+            if evaluation <= mini:
+                mini = evaluation
                 bmove = board.moves[i]
 
-        return (bmove, min)
+        return (bmove, mini)
