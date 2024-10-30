@@ -194,36 +194,38 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
     # change if needed
     white = True if board.color == 1 else False
 
+    # evals: list[float] = []
     if white:
         # return max(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
-        evals: list[float] = []
+        #
+        #
+        # return max(board.moves, key=lambda m: evaluate_move(m, board, depth))
         max = float("-inf")
         bmove = board.moves[0]
-        for move in board.moves:
-            evals.append(alphabeta(board, depth))
+        # for move in board.moves:
+        #     evals.append(evaluate_move(move, board, depth))
+        evals = [evaluate_move(move, board, depth) for move in board.moves]
 
         for i in range(0, len(evals)):
             eval = evals[i]
             if eval >= max:
                 max = eval
                 bmove = board.moves[i]
-                print(board.to_UCN(bmove))
-                # sleep(1)
 
         return (bmove, max)
 
     else:
         # return min(map(board.moves, evaluate_move, board, depth), key=lambda m: m[0])
-        evals: list[float] = []
-        max = float("inf")
+        min = float("inf")
         bmove = board.moves[0]
-        for move in board.moves:
-            evals.append(evaluate_move(move, board, depth))
+        # for move in board.moves:
+        #     evals.append(evaluate_move(move, board, depth))
+        evals = [evaluate_move(move, board, depth) for move in board.moves]
 
         for i in range(0, len(evals)):
             eval = evals[i]
-            if eval <= max:
-                max = eval
+            if eval <= min:
+                min = eval
                 bmove = board.moves[i]
 
-        return (bmove, max)
+        return (bmove, min)
