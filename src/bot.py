@@ -135,7 +135,6 @@ def print_board_stack(start: str = ""):
         for b in range(len(board_stack)):
             row += board_stack[b][r] + "\t"
         print(row)
-    pass
 
 
 def alphabeta(board: board, depth: int) -> float:
@@ -175,10 +174,10 @@ def alphabeta(board: board, depth: int) -> float:
             tb.print_after(b_rep, False, "")
             board_stack.append(b_rep)
             print_start_str = "\t" * (len(board_stack) - 1)
-            print(print_start_str + "[ABMAX] I'm searching board:")
-            print_board_stack(print_start_str)
+            # print(print_start_str + "[ABMAX] I'm searching board:")
+            print_board_stack("")
             val = abmin(tb, depth - 1, alpha, beta)
-            print(print_start_str + "[ABMAX] its value is: " + str(val))
+            # print(print_start_str + "[ABMAX] its value is: " + str(val))
             _ = board_stack.pop()
             if val >= beta:
                 return beta
@@ -197,10 +196,10 @@ def alphabeta(board: board, depth: int) -> float:
             tb.print_after(b_rep, False, "")
             board_stack.append(b_rep)
             print_start_str = "\t" * (len(board_stack) - 1)
-            print(print_start_str + "[ABMIN] I'm searching board:")
-            print_board_stack(print_start_str)
+            # print(print_start_str + "[ABMIN] I'm searching board:")
+            print_board_stack("")
             val = abmax(tb, depth - 1, alpha, beta)
-            print(print_start_str + "[ABMIN] its value is: " + str(val))
+            # print(print_start_str + "[ABMIN] its value is: " + str(val))
             _ = board_stack.pop()
             if val <= alpha:
                 return alpha
