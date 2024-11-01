@@ -3,6 +3,7 @@
 from time import sleep
 from typing import TypeAlias, Callable
 from chesskers import Board
+from pathos.multiprocessing import ProcessPool
 
 board: TypeAlias = Board
 blist: TypeAlias = list[list[int]]
@@ -185,7 +186,14 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
         # return max(board.moves, key=lambda m: evaluate_move(m, board, depth))
         max = float("-inf")
         bmove = board.moves[0]
-        evals = [evaluate_move(m, board, depth) for m in board.moves]
+
+        pool = ProcessPool(10)
+        print(board.color)
+        print("evaluating")
+        evals: list[int] = pool.map(
+            lambda m: evaluate_move(m, board, depth), board.moves
+        )
+        # evals = [evaluate_move(m, board, depth) for m in board.moves]
         for i in range(0, len(evals)):
             evaluation = evals[i]
             if evaluation >= maxi:
@@ -198,9 +206,13 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
         bmove = board.moves[0]
         # for move in board.moves:
         #     evals.append(evaluate_move(move, board, depth))
-        evals = [evaluate_move(move, board, depth) for move in board.moves]
+        # evals = [evaluate_move(move, board, depth) for move in board.moves]
 
-        evals = [evaluate_move(m, board, depth) for m in board.moves]
+        pool = ProcessPool(10)
+        print(board.color)
+        print("evaluation")
+        evals = pool.map(lambda m: evaluate_move(m, board, depth), board.moves)
+
         for i in range(0, len(evals)):
             evaluation = evals[i]
             if evaluation <= mini:
