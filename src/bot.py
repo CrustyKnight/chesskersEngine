@@ -123,22 +123,22 @@ def alphabeta(board: board, depth: int) -> float:
         return sorted(moves, key=lambda x: estimate_move(x))
 
     def abmax(board: Board, depth: int, alpha: int, beta: int) -> float:
-        print("Trying at depth: " + str(depth))
+        # print("Trying at depth: " + str(depth))
         if depth == 1:
             return evaluate(board)
         moves: list[Move] = order_moves(board.moves)
         for move in moves:
             tb = board.copy()
             tb.push(move)
-            b_rep = ["" for _ in range(10)]
-            tb.print_after(b_rep, False, "")
-            board_stack.append(b_rep)
-            print_start_str = "\t" * (len(board_stack) - 1)
+            # b_rep = ["" for _ in range(10)]
+            # tb.print_after(b_rep, False, "")
+            # board_stack.append(b_rep)
+            # print_start_str = "\t" * (len(board_stack) - 1)
             # print(print_start_str + "[ABMAX] I'm searching board:")
-            print_board_stack("")
+            # print_board_stack("")
             val = abmin(tb, depth - 1, alpha, beta)
             # print(print_start_str + "[ABMAX] its value is: " + str(val))
-            _ = board_stack.pop()
+            # _ = board_stack.pop()
             if val >= beta:
                 return beta
             if val > alpha:
@@ -152,15 +152,15 @@ def alphabeta(board: board, depth: int) -> float:
         for move in moves:
             tb = board.copy()
             tb.push(move)
-            b_rep = ["" for _ in range(10)]
-            tb.print_after(b_rep, False, "")
-            board_stack.append(b_rep)
-            print_start_str = "\t" * (len(board_stack) - 1)
+            # b_rep = ["" for _ in range(10)]
+            # tb.print_after(b_rep, False, "")
+            # board_stack.append(b_rep)
+            # print_start_str = "\t" * (len(board_stack) - 1)
             # print(print_start_str + "[ABMIN] I'm searching board:")
-            print_board_stack("")
+            # print_board_stack("")
             val = abmax(tb, depth - 1, alpha, beta)
             # print(print_start_str + "[ABMIN] its value is: " + str(val))
-            _ = board_stack.pop()
+            # _ = board_stack.pop()
             if val <= alpha:
                 return alpha
             if val < beta:
