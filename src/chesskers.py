@@ -846,7 +846,7 @@ R N B Q K B N R
                     land_row = 0
 
             land = (land_row, land_col)
-            if not self.empty(land):
+            if not self.empty(land) and not land_row == square[0]:
                 return None
 
             return (taken, (land_row, land_col))
@@ -1033,7 +1033,7 @@ R N B Q K B N R
             next_jumps: list[JumpMove] = next_level(jump)
             # if next_jumps == None:
             output.append([jump])  # [jump] is a valid JumpMove
-            if len(next_jumps) != 0:
+            if len(next_jumps) != 0: #HI MOM
                 for next_jump in next_jumps:
                     output.append([jump] + next_jump)
         # This feels mostly complete/roughed out, but the base case feels wrong.
