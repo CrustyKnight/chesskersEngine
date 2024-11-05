@@ -982,7 +982,7 @@ R N B Q K B N R
                 d = jump_direction(jump)
                 return d in [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 
-            if self.piece_at(jump_start(jump)) == 5:
+            if abs(self.piece_at(jump_start(jump))) == 5:
                 if diagonalp(jump):
                     return "diag"
                 else:

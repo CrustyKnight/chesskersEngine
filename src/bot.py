@@ -4,6 +4,7 @@ from time import sleep
 from typing import TypeAlias, Callable
 from chesskers import Board
 from pathos.multiprocessing import ProcessPool
+import subprocess
 
 board: TypeAlias = Board
 blist: TypeAlias = list[list[int]]
@@ -220,3 +221,19 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
                 bmove = board.moves[i]
 
         return (bmove, mini)
+
+
+def cl_find_best_move(board: Board, depth: int):
+    input_data = str(board) + "\n" + str(depth)
+    cmd = ["/home/sam/coding/cl-chesskers-engine/chesskers-computer-executable"]
+    return (
+        board.from_UCN(
+            subprocess.run(
+                cmd,
+                input=input_data,
+                capture_output=True,
+                text=True,
+            ).stdout
+        ),
+        1901,
+    )
