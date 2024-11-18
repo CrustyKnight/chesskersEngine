@@ -1044,12 +1044,9 @@ R N B Q K B N R
         return 0 == self.piece_at(square)
 
     def copy(self):
-        # b = Board(fen=False, board=self.__str__(), copy=True)
-        b = Board(fen=False, board=None, copy=True)
-        b.squares = [r[:] for r in self.squares]
+        b = Board(fen=False, board=self.__str__(), copy=True)
         b.color = self.color
         b.moves = self.moves
-        b.turns = self.turns
         return b
 
     def do_jump(self, jump: Jump):

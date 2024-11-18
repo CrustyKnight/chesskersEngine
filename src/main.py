@@ -38,11 +38,7 @@ class Main:
         )
         move = self.display.board.from_UCN(user_UCN)
         print("MOVE: " + self.display.board.to_UCN(move))
-        if (
-            move == None
-            or (self.board.color == 1 and self.turns_played % 2 == 1)
-            or (self.board.color == 0 and self.turns_played % 2 == 0)
-        ):
+        if move == None or (self.board.color == 1 and self.turns_played %2 == 1) or (self.board.color == 0 and self.turns_played %2 == 0):
             return "Invalid move"
         if self.board.is_jump(move):
             for m in move:

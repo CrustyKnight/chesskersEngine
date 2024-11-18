@@ -3,7 +3,6 @@
 from time import sleep
 from typing import TypeAlias, Callable
 from chesskers import Board
-from pathos.multiprocessing import ProcessPool
 
 board: TypeAlias = Board
 blist: TypeAlias = list[list[int]]
@@ -123,22 +122,22 @@ def alphabeta(board: board, depth: int) -> float:
         return sorted(moves, key=lambda x: estimate_move(x))
 
     def abmax(board: Board, depth: int, alpha: int, beta: int) -> float:
-        # print("Trying at depth: " + str(depth))
+        print("Trying at depth: " + str(depth))
         if depth == 1:
             return evaluate(board)
         moves: list[Move] = order_moves(board.moves)
         for move in moves:
             tb = board.copy()
             tb.push(move)
-            # b_rep = ["" for _ in range(10)]
-            # tb.print_after(b_rep, False, "")
-            # board_stack.append(b_rep)
-            # print_start_str = "\t" * (len(board_stack) - 1)
+            b_rep = ["" for _ in range(10)]
+            tb.print_after(b_rep, False, "")
+            board_stack.append(b_rep)
+            print_start_str = "\t" * (len(board_stack) - 1)
             # print(print_start_str + "[ABMAX] I'm searching board:")
-            # print_board_stack("")
+            print_board_stack("")
             val = abmin(tb, depth - 1, alpha, beta)
             # print(print_start_str + "[ABMAX] its value is: " + str(val))
-            # _ = board_stack.pop()
+            _ = board_stack.pop()
             if val >= beta:
                 return beta
             if val > alpha:
@@ -152,15 +151,15 @@ def alphabeta(board: board, depth: int) -> float:
         for move in moves:
             tb = board.copy()
             tb.push(move)
-            # b_rep = ["" for _ in range(10)]
-            # tb.print_after(b_rep, False, "")
-            # board_stack.append(b_rep)
-            # print_start_str = "\t" * (len(board_stack) - 1)
+            b_rep = ["" for _ in range(10)]
+            tb.print_after(b_rep, False, "")
+            board_stack.append(b_rep)
+            print_start_str = "\t" * (len(board_stack) - 1)
             # print(print_start_str + "[ABMIN] I'm searching board:")
-            # print_board_stack("")
+            print_board_stack("")
             val = abmax(tb, depth - 1, alpha, beta)
             # print(print_start_str + "[ABMIN] its value is: " + str(val))
-            # _ = board_stack.pop()
+            _ = board_stack.pop()
             if val <= alpha:
                 return alpha
             if val < beta:
@@ -186,14 +185,7 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
         # return max(board.moves, key=lambda m: evaluate_move(m, board, depth))
         max = float("-inf")
         bmove = board.moves[0]
-
-        pool = ProcessPool(10)
-        print(board.color)
-        print("evaluating")
-        evals: list[int] = pool.map(
-            lambda m: evaluate_move(m, board, depth), board.moves
-        )
-        # evals = [evaluate_move(m, board, depth) for m in board.moves]
+        evals = [evaluate_move(m, board, depth) for m in board.moves]
         for i in range(0, len(evals)):
             evaluation = evals[i]
             if evaluation >= maxi:
@@ -206,13 +198,9 @@ def find_best_move(board: Board, depth: int) -> tuple[Move, int | float]:
         bmove = board.moves[0]
         # for move in board.moves:
         #     evals.append(evaluate_move(move, board, depth))
-        # evals = [evaluate_move(move, board, depth) for move in board.moves]
+        evals = [evaluate_move(move, board, depth) for move in board.moves]
 
-        pool = ProcessPool(10)
-        print(board.color)
-        print("evaluation")
-        evals = pool.map(lambda m: evaluate_move(m, board, depth), board.moves)
-
+        evals = [evaluate_move(m, board, depth) for m in board.moves]
         for i in range(0, len(evals)):
             evaluation = evals[i]
             if evaluation <= mini:
