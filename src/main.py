@@ -125,4 +125,4 @@ def script() -> str:
 # Yay
 
 main = Main()
-main.main_loop()
+main.pve()
