@@ -89,7 +89,7 @@ class Main:
                 self.display.board.push(move)
                 update_display()
 
-            eval = find_best_move(self.display.board, depth=2)
+            eval = find_best_move(self.display.board, depth=1)
             bot_move, bot_score = eval
 
             # if self.display.board.is_jump(bot_move):
@@ -125,4 +125,4 @@ def script() -> str:
 # Yay
 
 main = Main()
-main.pve()
+main.main_loop()
