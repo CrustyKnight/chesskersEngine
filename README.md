@@ -59,7 +59,7 @@ Once you open up the program after cloning it, just press the run button, and th
     * Similarly, `d6c4tc3` means that the piece on `d6` (now the knight) took the piece (white pawn) on `c4` then landed on `c3`. Note that it could've also landed on `b4`: try and find out why. 
     * Finally, `c3b1tb8` means that the knight from `c3` took the piece on `b1` then landed back on on `b8`, marking the end of a turn as the edge was crossed, from b1 to b8. This is what Cole calls a "closet edge", in his nice and handy blog. 
     * This would be the resulting board: ![alt text](image-2.png)
-        * If none of this still makes sense, then please give Cole's blog a nice, long, legitimate read: https://kirawano.github.io/writings/chesskers.html 
+        * If none of this still makes sense, then please give Cole's blog a [nice, long, legitimate read](https://kirawano.github.io/writings/chesskers.html)
 * The game keeps going until one of the sides loses their king, or until a draw is reached by either threefold repetition or 50-move rule (look those up for chess, they're the exact same for chesskers)
 * Good luck, and have fun!
 
