@@ -45,7 +45,7 @@ git clone https://github.com/CrustyKnight/chesskersEngine.git
 Because our engine is prone to lagging because of the jump-chain nature of chesskers, it can only run reliably at depth 1 (i.e., it can see what move is best for itself, without seeing the opponent's best reply). If some lagging can be tolerated, then the engine can also run on depth 2 (now it sees the best move based on the fact that it can also see the opponent's next (and most probable) moves). 
 * The depth argument can be found on `line 92` of `main.py` in the `src` directory, and it can be altered there. 
 We believe that the reason for this lag is because of the inherent slowness of python. Sam, however, ported this program to common lisp, which can be accessed here: https://github.com/CrustyKnight/cl-chesskers-engine. That version, although with functional programming instead of object-oriented, does not have such lag problems. If we can find optimizations in the future, we will implement them. 
-* If you want to play against a friend (instead of against an engine), then just go to `line 128` of `main.py` in the `src` directory and replace `main.pve()` with `main.main_loop()`. To revert to player versus engine mode, j
+* If you want to play against a friend (instead of against an engine), then just go to `line 128` of `main.py` in the `src` directory and replace `main.pve()` with `main.main_loop()`. To revert to player versus engine mode, just do the opposite!
 Nevertheless, for the purpose of minimizing lag, the moves we enter are in Universal Chesskers Notation (UCN). If you are unfamiliar with this notation, check out Cole's blog, which is once again: https://kirawano.github.io/writings/chesskers.html 
 
 ## Post-Installation: Demonstrating moves
@@ -59,7 +59,7 @@ Once you open up the program after cloning it, just press the run button, and th
     * Similarly, `d6c4tc3` means that the piece on `d6` (now the knight) took the piece (white pawn) on `c4` then landed on `c3`. Note that it could've also landed on `b4`: try and find out why. 
     * Finally, `c3b1tb8` means that the knight from `c3` took the piece on `b1` then landed back on on `b8`, marking the end of a turn as the edge was crossed, from b1 to b8. This is what Cole calls a "closet edge", in his nice and handy blog. 
     * This would be the resulting board: ![alt text](image-2.png)
-        * If none of this still makes sense, then please give Cole's blog a [nice, long, legitimate read](https://kirawano.github.io/writings/chesskers.html)
+        * If none of this still makes sense, then please give Cole's blog a nice, long, legitimate read: https://kirawano.github.io/writings/chesskers.html 
 * The game keeps going until one of the sides loses their king, or until a draw is reached by either threefold repetition or 50-move rule (look those up for chess, they're the exact same for chesskers)
 * Good luck, and have fun!
 
